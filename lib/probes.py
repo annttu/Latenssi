@@ -5,6 +5,7 @@ from lib import config, ping, exceptions
 probe_types = {'ping': ping.Ping}
 
 probes = []
+probes_dict = {}
 
 probe_cache = {}
 
@@ -27,7 +28,9 @@ def create_probe(host, probe):
                 opts[k] = v
         # Create anonymous wrapper for probe
         probe_cache[probe] = lambda x: probe_types[config.probes[probe]['type']](x, **opts)
-    probes.append(probe_cache[probe](host))
+    p = probe_cache[probe](host)
+    probes.append(p)
+    probes_dict[p.rrd.name] = p
 
 def populate():
     """

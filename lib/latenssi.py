@@ -33,18 +33,23 @@ def html():
 def daemon():
     # Generate html files on startup
     html()
+    childs = []
     for probe in probes.probes:
-        p = probe.start()
-        childs.append(p)
+        probe.start()
+        childs.append(probe)
 
     try:
         while True:
             sleep(10)
+    except KeyboardInterrupt as e:
+        pass
     except Exception as e:
         pass
+
 
     for child in childs:
         try:
             child.stop()
         except Exception as e:
+            logger.error("Cannot stop child")
             logger.exception(e)
