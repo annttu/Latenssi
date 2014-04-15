@@ -3,7 +3,7 @@
 data_dir = "rrd_data"
 graph_dir = "/var/www/latency/img"
 html_dir = "/var/www/latency"
-graph_relative = "/latency/img/"
+relative_path = "/latency/"
 
 graph_width = 1100
 graph_height = 500

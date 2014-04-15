@@ -33,6 +33,9 @@ def populate():
     """
     Initialize configured probes
     """
+    if probes:
+        # Populate only once
+        return
     for hostname, host in config.hosts.items():
         for p in host['probes']:
             create_probe(hostname, p)

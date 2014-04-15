@@ -24,7 +24,7 @@ class Ping(Thread):
         self._stop = False
         self.p = None
         self._count = 5
-        self.rrd = RRD("ping%d-%s" % (self.protocol, self.target.replace(".", "_")))
+        self.rrd = RRD("ping%d-%s" % (self.protocol, self.target.replace(".", "_")), 'Ping%s %s' % (self.protocol, self.target))
         Thread.__init__(self)
 
     def stop(self):

@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 
-from lib import ping, rrd, config, probes
+from lib import ping, rrd, config, probes, web
 import settings
 
 from time import sleep
@@ -20,6 +20,9 @@ def graph():
     for child in probes.probes:
         child.rrd.graph()
 
+
+def html():
+    web.generate_pages()
 
 def daemon():
     for probe in probes.probes:
