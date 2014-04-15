@@ -17,14 +17,22 @@ config.load_config(setting_vars)
 probes.populate()
 
 def graph():
+    """
+    Generate static graphs
+    """
     for child in probes.probes:
         child.rrd.graph()
 
 
 def html():
+    """
+    Generate html files
+    """
     web.generate_pages()
 
 def daemon():
+    # Generate html files on startup
+    html()
     for probe in probes.probes:
         p = probe.start()
         childs.append(p)

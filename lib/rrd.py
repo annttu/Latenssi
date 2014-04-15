@@ -4,6 +4,7 @@ import rrdtool
 import logging
 from lib import config
 import os
+from datetime import datetime
 
 logger = logging.getLogger("RRD")
 
@@ -40,14 +41,31 @@ class RRD(object):
         rrdtool.update(self.filename, '%s:%f:%f' % (time, ping, miss))
 
 
-    def graph(self, graphfile=None):
+    def graph(self, graphfile=None, width=None, height=None, start=None, end=None):
         if not graphfile:
             graphfile = self.graphfile
+        if not width:
+            width = str(config.graph_width)
+        else:
+            width = str(int(width))
+        if not height:
+            height = str(config.graph_height)
+        else:
+            height = str(int(height))
+        if start:
+            start = str(int(start))
+        if end:
+            end = str(int(end))
         logger.debug("Graphing %s to file %s" % (self.filename, graphfile))
         opts = [graphfile,
-                '-t', str(self.name),
-                '-w', str(config.graph_width),
-                '-h', str(config.graph_height),
+                '-t', str(self.title),
+                '-w', width,
+                '-h', height]
+        if start:
+            opts += ['-s', start]
+        if end:
+            opts += ['-e', end]
+        opts += [
                 'DEF:ping=%s:ping:AVERAGE' % self.filename,
                 'DEF:ping_max=%s:ping:MAX' % self.filename,
                 'DEF:ping_min=%s:ping:MIN' % self.filename,
@@ -57,14 +75,14 @@ class RRD(object):
                 'DEF:ping_midterm_max=%s:ping:MAX:step=60' % self.filename,
                 'DEF:ping_longterm_min=%s:ping:MIN:step=360' % self.filename,
                 'DEF:ping_longterm_max=%s:ping:MAX:step=360' % self.filename,
-                'DEF:miss=%s:miss:AVERAGE:step=1' % self.filename,
+                'DEF:miss=%s:miss:AVERAGE' % self.filename,
                 'DEF:miss_max=%s:miss:MAX' % self.filename,
                 'DEF:miss_min=%s:miss:MIN' % self.filename,
-                'CDEF:lost_1=miss,0.01,GT,1,0,IF',
-                'CDEF:lost_2=miss,0.02,GT,1,0,IF',
-                'CDEF:lost_3=miss,0.03,GT,1,0,IF',
-                'CDEF:lost_4=miss,0.04,GT,1,0,IF',
-                'CDEF:lost_5=miss,0.15,GE,1,0,IF',
+                'CDEF:lost_1=miss,0.05,GE,1,0,IF',
+                'CDEF:lost_2=miss,0.08,GE,1,0,IF',
+                'CDEF:lost_3=miss,0.12,GE,1,0,IF',
+                'CDEF:lost_4=miss,0.16,GE,1,0,IF',
+                'CDEF:lost_5=miss,0.25,GE,1,0,IF',
                 'AREA:ping_longterm_max#c0c0c0',
                 'AREA:ping_longterm_min#FFFFFF',
                 'AREA:ping_midterm_max#808080',
@@ -80,14 +98,16 @@ class RRD(object):
                 'GPRINT:ping:MIN:\tMin\: %6.2lf ms\t',
                 'GPRINT:ping:MAX:\tMax\: %6.2lf ms\\n',
                 #'AREA:loss#FF3030:"Loss":1:1',
-                'TICK:lost_1#FF909020:1.0:Loss 1/5',
-                'TICK:lost_2#FF606060:1.0:Loss 2/5',
-                'TICK:lost_3#FF303090:1.0:Loss 3/5',
-                'TICK:lost_4#FF3030a0:1.0:Loss 4/5',
+                'TICK:lost_1#FF404060:1.0:Loss 1/5',
+                'TICK:lost_2#FF606080:1.0:Loss 2/5',
+                'TICK:lost_3#FF3030a0:1.0:Loss 3/5',
+                'TICK:lost_4#FF3030c0:1.0:Loss 4/5',
                 'TICK:lost_5#FF3030e0:1.0:Loss 5/5',
                 #'GPRINT:loss:AVERAGE:\t\tAvg\: %6.0lf %%\t',
                 #'GPRINT:loss:MIN:\tMin\: %6.2lf %%\t',
                 #'GPRINT:loss:MAX:\tMax\: %6.2lf %%\\n',
+                'COMMENT:\\n',
+                'COMMENT:%s\\r' % datetime.now().strftime("%d.%m.%Y %H\:%M\:%S"),
                 ]
         rrdtool.graph(*opts)
         logger.debug("%s updated" % graphfile)
