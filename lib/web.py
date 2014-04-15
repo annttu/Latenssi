@@ -31,11 +31,15 @@ webgenerator = LatenssiWeb()
 def generate_pages():
     pages = []
     for probe in probes.probes:
+        if not config.dynamic_graphs:
+            img = os.path.join(config.relative_path, 'img/', os.path.basename(probe.rrd.graphfile))
+        else:
+            img = os.path.join(config.relative_path, 'graph.fcgi?graph=%s&interval=day' % probe.rrd.name)
         opts = {
             'host': {'name': probe.rrd.title,
                 'probes': [
                  {
-                    'img': os.path.join(config.relative_path, 'img/', os.path.basename(probe.rrd.graphfile)),
+                    'img': img,
                     'name': str(probe.__class__.__name__)
                  },
                  ]
@@ -43,5 +47,5 @@ def generate_pages():
         }
         filename = "%s.html" % probe.rrd.name.replace('.','_')
         webgenerator.generate(filename, 'host.html', opts)
-        pages.append({'link': filename, 'name': probe.rrd.title, 'img': opts['host']['probes'][0]['img']})
+        pages.append({'link': filename, 'name': probe.rrd.name ,'title': probe.rrd.title, 'img': "%s&width=800&height=400" % opts['host']['probes'][0]['img']})
     webgenerator.generate('index.html', 'index.html', {'pages': pages})

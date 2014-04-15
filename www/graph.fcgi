@@ -60,10 +60,24 @@ def app(environ, start_response):
             return
         else:
             start = time.time() - intervals[interval]
+    width = None
+    height = None
+    if 'width' in params:
+        try:
+            width = int(params['width'][0])
+        except ValueError:
+            yield error("Invalid width")
+            return
+    if 'height' in params:
+        try:
+            height = int(params['height'][0])
+        except ValueError:
+            yield error("Invalid height")
+            return
     start_response('200 OK', [('Content-Type', 'image/png')])
     (tf, path) = tempfile.mkstemp()
     try:
-        rrd.graph(path, start=start, end=end)
+        rrd.graph(path, start=start, end=end, width=width, height=height)
         f = os.fdopen(tf, 'rb')
         yield f.read()
         f.close()
