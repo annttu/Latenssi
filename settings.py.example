@@ -1,0 +1,12 @@
+# encoding: utf-8
+
+from lib.ping import Ping
+
+data_dir = "rrd_data"
+graph_dir = "/var/www/latency/img"
+html_dir = "/var/www/latency"
+graph_relative = "/latency/img/"
+
+probes=[Ping("google.fi", 4)]
+
+
