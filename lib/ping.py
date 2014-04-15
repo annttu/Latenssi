@@ -23,6 +23,7 @@ class Ping(Thread):
         self.protocol = protocol
         self._stop = False
         self.p = None
+        self._count = 5
         self.rrd = RRD("ping%d-%s" % (self.protocol, self.target.replace(".", "_")))
         Thread.__init__(self)
 
@@ -43,6 +44,9 @@ class Ping(Thread):
             return
         out = m.groupdict()
         out['timestamp'] = int(time.time() - 2.5) # timestamp at center of metering time
+        if int(out['rcv']) > self._count:
+            logger.debug("Totals %s" % (out, ))
+            return
         logger.debug(out)
         self.rrd.update(time=out['timestamp'], ping=float(out['avg']), miss=( int(out['xmt']) - int(out['rcv'])))
 
@@ -53,12 +57,11 @@ class Ping(Thread):
                 ping = config.fping6
             else:
                 ping = config.fping
-            self.p = subprocess.Popen([ping, '-Q5','-c60', self.target],
+            self.p = subprocess.Popen([ping, '-Q%s' % self._count,'-c60', self.target],
                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE) # Run 60sec reporting per 5 sec
             while not self._stop:
                 try:
                     line = self.p.stderr.readline()
-                    print("LINE: %s" % line)
                     if not line:
                         if self.p.poll() is not None:
                             break

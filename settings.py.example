@@ -7,6 +7,18 @@ graph_dir = "/var/www/latency/img"
 html_dir = "/var/www/latency"
 graph_relative = "/latency/img/"
 
-probes=[Ping("google.fi", 4)]
+probes = {
+    'ping': {
+        'type': 'ping',
+        'protocol': 4
+    },
+    'ping6': {
+        'type': 'ping',
+        'protocol': 6
+    }
+}
 
+hosts = {
+    'google.com': {'probes': ['ping', 'ping6']},
+}
 
