@@ -18,9 +18,6 @@ execfile(activate_this, dict(__file__=activate_this))
 
 from lib import config, latenssi, probes
 
-intervals = {'hour': 3600, '2hour': 7200, '8hour': 8 * 3600, 'day': 24 * 3600, 'week': 7*24*3600, 'month': 30*24*3600, 'year': 365*24*3600}
-
-
 def app(environ, start_response):
     def error(msg):
         start_response('400 Bad Request', [('Content-Type', 'text/plain')])
@@ -61,11 +58,11 @@ def app(environ, start_response):
         end = time.time()
     if 'interval' in params:
         interval = params['interval'][0]
-        if interval not in intervals.keys():
+        if interval not in config.intervals.keys():
             yield error("Invalid interval")
             return
         else:
-            start = time.time() - intervals[interval]
+            start = time.time() - config.intervals[interval]
     width = None
     height = None
     if 'width' in params:

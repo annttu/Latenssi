@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 {% block body %}
 <h1>Latenssi</h1>
+{% include "intervals.html" with context %}
 <div class="linklist">
 {% for page in pages %}
 <div class="link">
-	<h2>{{page.name}}</h2>
+	<h2>{{page.title}}</h2>
 	<p><a href="{{page.link}}"><img src="{{page.img}}" alt="{{page.name}}"></a><p>
 </div>
 {% endfor %}

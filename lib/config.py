@@ -13,6 +13,19 @@ graph_height = 500
 fping = "/usr/bin/fping"
 fping6 = "/usr/bin/fping6"
 
+# Graph intervals
+intervals = {
+   'hour': 3600,
+   '2hour': 7200,
+   '8hour': 8 * 3600,
+   'day': 24 * 3600,
+   'week': 7*24*3600,
+   'month': 30*24*3600,
+   'year': 365*24*3600
+}
+
+default_interval = 'day'
+
 hosts = {}
 probes = {}
 

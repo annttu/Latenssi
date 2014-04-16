@@ -1,0 +1,5 @@
+<div class="intervals">
+{% for interval in intervals %}
+<a {% if interval.active %}class="activepage"{% else %}href="{{interval.link}}"{% endif %}>{{interval.name}}</a>&nbsp;
+{% endfor %}
+</div>

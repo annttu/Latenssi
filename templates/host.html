@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block body %}
-<p><a href="index.html">Back</a></p>
+<p><a href="{{index}}">Back</a></p>
+{% include "intervals.html" with context %}
 <h1>{{ host.name }}</h1>
 {% for probe in host.probes %}
 <div class="probe">
