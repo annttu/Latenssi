@@ -26,6 +26,9 @@ intervals = {
 
 default_interval = 'day'
 
+# How often flush collected data to rrdfile
+sync_interval = 59
+
 hosts = {}
 probes = {}
 

@@ -63,7 +63,7 @@ def generate_pages():
                      },
                      ]
                  },
-                 'intervals': generate_intervals(probe.rrd.name, interval),
+                 'intervals': generate_intervals(probe.name, interval),
                  'index': generate_filename('index', interval),
             }
             webgenerator.generate(filename, 'host.html', opts)

@@ -30,7 +30,7 @@ def create_probe(host, probe):
         probe_cache[probe] = lambda x: probe_types[config.probes[probe]['type']](x, **opts)
     p = probe_cache[probe](host)
     probes.append(p)
-    probes_dict[p.rrd.name] = p
+    probes_dict[p.name] = p
 
 def populate():
     """

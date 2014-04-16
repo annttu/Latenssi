@@ -9,6 +9,8 @@ import time
 
 logger = logging.getLogger("RRD")
 
+ptime = time
+
 class RRD(object):
     def __init__(self, name, title=None):
         self.name = name
@@ -18,6 +20,8 @@ class RRD(object):
             self.title = title
         self.filename = os.path.join(config.data_dir, '%s.rrd' % self.name)
         self.create()
+        self.cache = []
+        self._latest = 0
 
     def create(self):
         if os.path.exists(self.filename):
@@ -38,8 +42,33 @@ class RRD(object):
                        )
 
     def update(self, ping, miss=0, time="N"):
-        rrdtool.update(self.filename, '%s:%f:%f' % (time, ping, miss))
+        if time == 'N':
+            time = ptime.time()
+        self.cache.append((time, ping, miss))
 
+    def sync(self):
+        logger.debug("Syncing points to file %s" % self.filename)
+        points = []
+        for point in self.cache:
+            if point[0] > self._latest:
+                self._latest = int(point[0])
+            elif point[0] == self._latest:
+                # Duplicates not allowed
+                logger.info("Ignoring duplicate point for time %s on %s" % (point[0], self.filename))
+                continue
+            points.append('%s:%f:%f' % (point[0], point[1], point[2]))
+        if len(points) == 0:
+            return
+        try:
+            rrdtool.update(self.filename, *points)
+            self.cache = []
+        except Exception as e:
+            logger.error("Cannot save points to file %s" % self.filename)
+            logger.exception(e)
+        if len(self.cache) > 500:
+            # don't cache forever, drop from begin
+            while len(self.cache) < 500:
+                self.cache.pop(0)
 
     def graphfile(self, interval=None):
         if interval:
