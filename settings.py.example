@@ -5,7 +5,9 @@ from lib.ping import Ping
 data_dir = "rrd_data"
 graph_dir = "/var/www/latency/img"
 html_dir = "/var/www/latency"
-graph_relative = "/latency/img/"
+relative_path = "/latecy/"
+
+dynamic_graphs = True
 
 probes = {
     'ping': {
