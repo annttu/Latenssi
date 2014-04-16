@@ -5,6 +5,7 @@ import logging
 from lib import config
 import os
 from datetime import datetime
+import time
 
 logger = logging.getLogger("RRD")
 
@@ -16,7 +17,6 @@ class RRD(object):
         else:
             self.title = title
         self.filename = os.path.join(config.data_dir, '%s.rrd' % self.name)
-        self.graphfile = os.path.join(config.graph_dir, '%s.png' % self.name)
         self.create()
 
     def create(self):
@@ -41,9 +41,12 @@ class RRD(object):
         rrdtool.update(self.filename, '%s:%f:%f' % (time, ping, miss))
 
 
-    def graph(self, graphfile=None, width=None, height=None, start=None, end=None):
-        if not graphfile:
-            graphfile = self.graphfile
+    def graphfile(self, interval=None):
+        if interval:
+            return os.path.join(config.graph_dir, '%s-%s.png' % (self.name, interval))
+        return os.path.join(config.graph_dir, '%s.png' % self.name)
+
+    def graph(self, graphfile=None, width=None, height=None, start=None, end=None, interval=None):
         if not width:
             width = str(config.graph_width)
         else:
@@ -56,6 +59,18 @@ class RRD(object):
             start = str(int(start))
         if end:
             end = str(int(end))
+        if interval:
+            if not interval in config.intervals:
+                raise RuntimeError("Unknown interval")
+            if not end:
+                end = str(int(time.time()))
+            start = str(int(end) - config.intervals[interval])
+            if not graphfile:
+                graphfile = self.graphfile(interval=interval)
+        if not graphfile:
+            graphfile = self.graphfile()
+
+
         logger.debug("Graphing %s to file %s" % (self.filename, graphfile))
         opts = [graphfile,
                 '-t', str(self.title),

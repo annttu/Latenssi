@@ -20,8 +20,9 @@ def graph():
     """
     Generate static graphs
     """
-    for child in probes.probes:
-        child.rrd.graph()
+    for interval_name, interval in config.intervals.items():
+        for child in probes.probes:
+            child.rrd.graph(interval=interval_name)
 
 
 def html():
