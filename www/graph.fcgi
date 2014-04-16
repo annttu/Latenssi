@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 # encoding: utf-8
 
 from cgi import escape
@@ -8,7 +8,13 @@ from urlparse import urlparse, parse_qs
 import time
 import tempfile
 
-sys.path.insert(0, '/opt/latenssi/Latenssi')
+LATENSSI="/opt/latenssi"
+
+sys.path.insert(0, LATENSSI)
+
+# Enable virtualenv if needed
+activate_this = os.path.join(LATENSSI, 'env/bin/activate_this.py')
+execfile(activate_this, dict(__file__=activate_this))
 
 from lib import config, latenssi, probes
 

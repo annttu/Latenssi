@@ -60,7 +60,9 @@ class RRD(object):
         opts = [graphfile,
                 '-t', str(self.title),
                 '-w', width,
-                '-h', height]
+                '-h', height,
+                '-X', '0',
+                '-v', 'ms']
         if start:
             opts += ['-s', start]
         if end:

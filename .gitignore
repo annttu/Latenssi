@@ -2,3 +2,5 @@ env/
 *.pyc
 *.swp
 settings.py
+www/index.html
+www/*-*.html
