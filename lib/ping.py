@@ -23,7 +23,7 @@ class Ping(probe.Probe):
         super(Ping, self).__init__(target)
         self.p = None
         self._count = 5
-        self.rrd = RRD(self.name.lower(), '%s %s' % (self._name, self.target))
+        RRD.register(self.name, '%s %s' % (self._name, self.target))
 
     def _kill(self):
         if self.p and self.p.returncode is not None:
@@ -45,7 +45,7 @@ class Ping(probe.Probe):
             logger.debug("Totals %s" % (out, ))
             return
         logger.debug(out)
-        self.rrd.update(time=out['timestamp'], ping=float(out['avg']), miss=( int(out['xmt']) - int(out['rcv'])))
+        RRD.update(self.name, time=out['timestamp'], ping=float(out['avg']), miss=( int(out['xmt']) - int(out['rcv'])))
 
     def main(self):
         logger.debug("Starting fping to %s" % self.target)

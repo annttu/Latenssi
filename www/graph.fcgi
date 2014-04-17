@@ -17,6 +17,7 @@ activate_this = os.path.join(LATENSSI, 'env/bin/activate_this.py')
 execfile(activate_this, dict(__file__=activate_this))
 
 from lib import config, latenssi, probes
+from lib.rrd import RRD
 
 def app(environ, start_response):
     def error(msg):
@@ -25,7 +26,7 @@ def app(environ, start_response):
 
     params = parse_qs(environ['QUERY_STRING'])
     graph = None
-    rrd = None
+    name = None
     interval = None
     if 'graph' in params:
         graph = params['graph'][0]
@@ -33,7 +34,7 @@ def app(environ, start_response):
             yield error("Invalid probe")
             return
         else:
-            rrd = probes.probes_dict[graph].rrd
+            name = probes.probes_dict[graph].name
     else:
         error("graph missing")
         return
@@ -80,11 +81,12 @@ def app(environ, start_response):
     start_response('200 OK', [('Content-Type', 'image/png')])
     (tf, path) = tempfile.mkstemp()
     try:
-        rrd.graph(path, start=start, end=end, width=width, height=height)
+        RRD.graph(name, path, start=start, end=end, width=width, height=height)
         f = os.fdopen(tf, 'rb')
         yield f.read()
         f.close()
     except Exception as e:
+        yield "Got unknown error %s" % e
         pass
     os.remove(path)
 

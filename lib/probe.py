@@ -5,7 +5,6 @@
 Probe template class
 """
 
-from lib.rrd import RRD
 from lib import config
 
 from threading import Thread
@@ -29,6 +28,7 @@ class Probe(Thread):
         if '_name' not in vars(self):
             self._name = self.__class__.__name__
         self.name = "%s-%s" % (self._name.lower(), target.replace(".", "_"))
+        self.title = "%s %s" % (self._name, target)
 
     def stop(self):
         """
@@ -45,13 +45,6 @@ class Probe(Thread):
         """
         pass
 
-    def sync(self, force=False):
-        """
-        Flush data to rrd
-        """
-        if (len(self.rrd.cache) > 0 and self.rrd.cache[0][0] < (time.time() - config.sync_interval)) or force:
-            self.rrd.sync()
-
     def main(self):
         """
         This functions is looped forever,
@@ -65,7 +58,6 @@ class Probe(Thread):
             start = time.time()
             try:
                 self.main()
-                self.sync()
             except Exception as e:
                 logger.exception(e)
                 logger.error("Error occured on probe %s, suspended for 5 seconds" % self.name)

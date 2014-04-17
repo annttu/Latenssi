@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-from lib import config, probes
+from lib import config, probes, rrd
 
 import os
 from jinja2 import Environment, FileSystemLoader
@@ -50,12 +50,12 @@ def generate_pages():
         pages = []
         for probe in probes.probes:
             if not config.dynamic_graphs:
-                img = os.path.join(config.relative_path, 'img/', os.path.basename(probe.rrd.graphfile))
+                img = os.path.join(config.relative_path, 'img/', os.path.basename(rrd.RRD.get_graphfile(probe.name)))
             else:
-                img = os.path.join(config.relative_path, 'graph.fcgi?graph=%s&interval=%s' % (probe.rrd.name, interval))
-            filename = generate_filename(probe.rrd.name, interval)
+                img = os.path.join(config.relative_path, 'graph.fcgi?graph=%s&interval=%s' % (probe.name, interval))
+            filename = generate_filename(probe.name, interval)
             opts = {
-                'host': {'name': probe.rrd.title,
+                'host': {'name': probe.title,
                     'probes': [
                      {
                         'img': img,
@@ -67,6 +67,6 @@ def generate_pages():
                  'index': generate_filename('index', interval),
             }
             webgenerator.generate(filename, 'host.html', opts)
-            pages.append({'link': filename, 'name': probe.rrd.name ,'title': probe.rrd.title, 'img': "%s&width=800&height=400" % opts['host']['probes'][0]['img']})
+            pages.append({'link': filename, 'name': probe.name ,'title': probe.title, 'img': "%s&width=800&height=400" % opts['host']['probes'][0]['img']})
         index_filename = generate_filename('index', interval)
         webgenerator.generate(index_filename, 'index.html', {'pages': pages, 'intervals': generate_intervals('index', interval)})

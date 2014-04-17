@@ -22,7 +22,7 @@ def graph():
     """
     for interval_name, interval in config.intervals.items():
         for child in probes.probes:
-            child.rrd.graph(interval=interval_name)
+            rrd.RRD.graph(child.name, interval=interval_name)
 
 
 def html():
@@ -36,8 +36,12 @@ def daemon():
     html()
     childs = []
     for probe in probes.probes:
-        probe.start()
         childs.append(probe)
+
+    childs.append(rrd.RRD)
+
+    for child in childs:
+        child.start()
 
     try:
         while True:

@@ -6,18 +6,19 @@ from lib import config
 import os
 from datetime import datetime
 import time
+from threading import Thread, Lock
 
 logger = logging.getLogger("RRD")
 
 ptime = time
 
-class RRD(object):
+class RRDFile(object):
     def __init__(self, name, title=None):
-        self.name = name
-        if not title:
-            self.title = self.name
-        else:
+        self.name = name.replace('.','_')
+        if title:
             self.title = title
+        else:
+            self.title = name
         self.filename = os.path.join(config.data_dir, '%s.rrd' % self.name)
         self.create()
         self.cache = []
@@ -157,3 +158,51 @@ class RRD(object):
                 ]
         rrdtool.graph(*opts)
         logger.debug("%s updated" % graphfile)
+
+
+class RRDManager(Thread):
+    def __init__(self):
+        Thread.__init__(self)
+        self._stop = False
+        self.rrds = {}
+        self._lock = Lock()
+
+    def stop(self):
+        self._stop = True
+
+    def normaize_name(self, name):
+        return name.lower().replace('.', '_')
+
+    def register(self, name, title=None):
+        name = self.normaize_name(name)
+        if name not in self.rrds:
+            self.rrds[name] = RRDFile(name, title=title)
+
+    def update(self, name, ping, miss=0, time='N'):
+        self.register(name)
+        self.rrds[name].update(ping=ping, miss=miss, time=time)
+
+    def graph(self, name, *args, **kwargs):
+        """
+        Graph rrd by name `name'
+        """
+        name = self.normaize_name(name)
+
+        if name not in self.rrds:
+            raise RuntimeError("RRD by name %s not found" % name)
+
+        return self.rrds[name].graph(*args, **kwargs)
+
+    def sync(self):
+        for rrd in self.rrds.values():
+            rrd.sync()
+
+    def run(self):
+        prev = time.time()
+        while not self._stop:
+            time.sleep(0.5)
+            if (time.time() - config.sync_interval) > prev:
+                prev = time.time()
+                self.sync()
+
+RRD = RRDManager()
