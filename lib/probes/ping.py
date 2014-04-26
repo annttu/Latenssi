@@ -2,7 +2,9 @@
 # encoding: utf-8
 
 from lib.rrd import RRD
-from lib import config, probe
+from lib import config
+from lib.probe import register_probe
+from lib.probes import probe
 
 import subprocess
 import logging
@@ -78,3 +80,5 @@ class Ping(probe.Probe):
             time.sleep(5)
             return
 
+
+register_probe('ping',Ping)

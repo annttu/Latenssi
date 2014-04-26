@@ -2,7 +2,7 @@
 
 import rrdtool
 import logging
-from lib import config
+from lib import config, utils
 import os
 from datetime import datetime
 import time
@@ -27,7 +27,8 @@ class RRDFile(object):
     def create(self):
         if os.path.exists(self.filename):
             return
-        rrdtool.create(self.filename, '--step', '5', '--start', '0',
+        rrdtool.create(self.filename, '--step', '5', '--start', '%s' % (int(time.time()) - 60),
+                       '--no-overwrite',
                        'DS:ping:GAUGE:5:0:30000',
                        'DS:miss:GAUGE:5:0:5',
                        'RRA:LAST:0.0:1:535680', # Save one month data with 5 sec resolution
@@ -36,7 +37,7 @@ class RRDFile(object):
                        'RRA:AVERAGE:0.5:12:525600', # Save one year data with 60 sec resolution
                        'RRA:AVERAGE:0.5:60:525600', # Save 5 years data with 5min resolution
                        'RRA:AVERAGE:0.5:360:525600', # Save 30 year data with 30min resolution
-                       'RRA:MAX:0.5:1:535680', 
+                       'RRA:MAX:0.5:1:535680',
                        'RRA:MAX:0.5:12:525600',
                        'RRA:MIN:0.5:1:535680',
                        'RRA:MIN:0.5:12:525600',
@@ -44,7 +45,8 @@ class RRDFile(object):
 
     def update(self, ping, miss=0, time="N"):
         if time == 'N':
-            time = ptime.time()
+            time = int(ptime.time())
+        logger.debug("Adding datapoint %s,%s to %s @ %s" % (ping, miss, self.filename, time))
         self.cache.append((time, ping, miss))
 
     def sync(self):
@@ -57,11 +59,20 @@ class RRDFile(object):
                 # Duplicates not allowed
                 logger.info("Ignoring duplicate point for time %s on %s" % (point[0], self.filename))
                 continue
-            points.append('%s:%f:%f' % (point[0], point[1], point[2]))
+            if point[1] is None:
+                points.append("%s:U:%f" % (int(point[0]), float(point[2])))
+            else:
+                points.append('%s:%f:%f' % (int(point[0]), point[1], point[2]))
         if len(points) == 0:
+            logger.info("No points on cache for %s" % self.filename)
             return
+        else:
+            logger.debug("New points for %s: %s" % (self.filename, ', '.join(points)))
         try:
-            rrdtool.update(self.filename, *points)
+            #rrdtool.update(self.filename, *points)
+            for point in points:
+                logger.info("Updating point %s to %s" % (point, self.filename))
+                rrdtool.update(self.filename, point)
             self.cache = []
         except Exception as e:
             logger.error("Cannot save points to file %s" % self.filename)
@@ -156,8 +167,10 @@ class RRDFile(object):
                 'COMMENT:\\n',
                 'COMMENT:%s\\r' % datetime.now().strftime("%d.%m.%Y %H\:%M\:%S"),
                 ]
-        rrdtool.graph(*opts)
+        logger.debug("rrdtool graph %s" % ' \\\n'.join(["'%s'" % x for x in opts]))
+        out = rrdtool.graph(*opts)
         logger.debug("%s updated" % graphfile)
+        return out
 
 
 class RRDManager(Thread):
@@ -166,15 +179,14 @@ class RRDManager(Thread):
         self._stop = False
         self.rrds = {}
         self._lock = Lock()
+        self._name_cache = {}
 
     def stop(self):
         self._stop = True
-
-    def normaize_name(self, name):
-        return name.lower().replace('.', '_')
+        self.sync()
 
     def register(self, name, title=None):
-        name = self.normaize_name(name)
+        name = utils.sanitize(name)
         if name not in self.rrds:
             self.rrds[name] = RRDFile(name, title=title)
 
@@ -182,14 +194,25 @@ class RRDManager(Thread):
         self.register(name)
         self.rrds[name].update(ping=ping, miss=miss, time=time)
 
+    def search(self, prefix):
+        return [o.rstrip('.rrd') for o in os.listdir(config.data_dir) if o.startswith(prefix)]
+
+    def exists(self, name):
+        if name not in self._name_cache:
+            self._name_cache[name] = os.path.isfile(os.path.join(config.data_dir, '%s.rrd' % name))
+        return self._name_cache[name]
+
     def graph(self, name, *args, **kwargs):
         """
         Graph rrd by name `name'
         """
-        name = self.normaize_name(name)
+        name = utils.sanitize(name)
+
+        if not self.exists(name):
+            raise RuntimeError("RRD by name %s not found" % name)
 
         if name not in self.rrds:
-            raise RuntimeError("RRD by name %s not found" % name)
+            self.rrds[name] = RRDFile(name)
 
         return self.rrds[name].graph(*args, **kwargs)
 

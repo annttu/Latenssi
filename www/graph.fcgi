@@ -8,7 +8,7 @@ from urlparse import urlparse, parse_qs
 import time
 import tempfile
 
-LATENSSI="/opt/latenssi"
+LATENSSI="/home/users/annttu/Latenssi"
 
 sys.path.insert(0, LATENSSI)
 
@@ -16,7 +16,7 @@ sys.path.insert(0, LATENSSI)
 activate_this = os.path.join(LATENSSI, 'env/bin/activate_this.py')
 execfile(activate_this, dict(__file__=activate_this))
 
-from lib import config, latenssi, probes
+from lib import config, latenssi, probe
 from lib.rrd import RRD
 
 def app(environ, start_response):
@@ -28,16 +28,24 @@ def app(environ, start_response):
     graph = None
     name = None
     interval = None
-    if 'graph' in params:
-        graph = params['graph'][0]
-        if graph not in probes.probes_dict:
-            yield error("Invalid probe")
+    if 'name' in params:
+        name = params['name'][0]
+        if name not in probe.probes_dict:
+            yield error("Invalid probe %s" % name)
             return
         else:
-            name = probes.probes_dict[graph].name
+           name = probe.probes_dict[name].name
     else:
-        error("graph missing")
+        yield error("Name is mandatory")
         return
+
+    if 'graph' in params:
+        graph = params['graph'][0]
+        if not RRD.exists(graph):
+            yield error("Invalid probe")
+            return
+    else:
+        graph = name
 
     start = None
     end = None
@@ -81,7 +89,7 @@ def app(environ, start_response):
     start_response('200 OK', [('Content-Type', 'image/png')])
     (tf, path) = tempfile.mkstemp()
     try:
-        RRD.graph(name, path, start=start, end=end, width=width, height=height)
+        RRD.graph(graph, path, start=start, end=end, width=width, height=height)
         f = os.fdopen(tf, 'rb')
         yield f.read()
         f.close()

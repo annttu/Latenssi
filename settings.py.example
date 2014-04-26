@@ -1,7 +1,5 @@
 # encoding: utf-8
 
-from lib.ping import Ping
-
 data_dir = "rrd_data"
 graph_dir = "/var/www/latency/img"
 html_dir = "/var/www/latency"

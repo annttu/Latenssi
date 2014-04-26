@@ -1,0 +1,23 @@
+html, body {
+    width: 100%;
+}
+
+body {
+    margin: 10px;
+}
+
+
+
+div#container {
+    margin: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    min-width: 900px;
+    max-width: 1200px;
+    display: block;
+}
+
+div.intervals {
+    display: inline-block;
+    margin: auto;
+}

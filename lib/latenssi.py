@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 
-from lib import ping, rrd, config, probes, web
+from lib import rrd, config, probe, web, probes
 import settings
 
 from time import sleep
@@ -14,15 +14,16 @@ logger.setLevel(logging.DEBUG)
 
 setting_vars = vars(settings)
 config.load_config(setting_vars)
-probes.populate()
+probe.populate()
 
 def graph():
     """
     Generate static graphs
     """
     for interval_name, interval in config.intervals.items():
-        for child in probes.probes:
-            rrd.RRD.graph(child.name, interval=interval_name)
+        for child in probe.probes:
+            for graph in child.graphs():
+                rrd.RRD.graph(graph, interval=interval_name)
 
 
 def html():
@@ -35,8 +36,8 @@ def daemon():
     # Generate html files on startup
     html()
     childs = []
-    for probe in probes.probes:
-        childs.append(probe)
+    for p in probe.probes:
+        childs.append(p)
 
     childs.append(rrd.RRD)
 

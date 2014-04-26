@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-from lib import config, probes, rrd
+from lib import config, probe as lib_probe, rrd
 
 import os
 from jinja2 import Environment, FileSystemLoader
@@ -48,24 +48,24 @@ def generate_intervals(name, current=None):
 def generate_pages():
     for interval in config.intervals:
         pages = []
-        for probe in probes.probes:
-            if not config.dynamic_graphs:
-                img = os.path.join(config.relative_path, 'img/', os.path.basename(rrd.RRD.get_graphfile(probe.name)))
-            else:
-                img = os.path.join(config.relative_path, 'graph.fcgi?graph=%s&interval=%s' % (probe.name, interval))
+        for probe in lib_probe.probes:
+            graphs = []
+            for graph in probe.graphs():
+                if not config.dynamic_graphs:
+                    img = os.path.join(config.relative_path, 'img/', os.path.basename(rrd.RRD.get_graphfile(graph)))
+                else:
+                    img = os.path.join(config.relative_path, 'graph.fcgi?graph=%s&interval=%s&name=%s' % (graph, interval, probe.name))
+                graphs.append({'img': img, 'name': graph})
             filename = generate_filename(probe.name, interval)
             opts = {
                 'host': {'name': probe.title,
-                    'probes': [
-                     {
-                        'img': img,
-                        'name': str(probe.__class__.__name__)
-                     },
-                     ]
+                    'probes': graphs,
                  },
                  'intervals': generate_intervals(probe.name, interval),
                  'index': generate_filename('index', interval),
             }
+            if not graphs:
+                continue
             webgenerator.generate(filename, 'host.html', opts)
             pages.append({'link': filename, 'name': probe.name ,'title': probe.title, 'img': "%s&width=800&height=400" % opts['host']['probes'][0]['img']})
         index_filename = generate_filename('index', interval)

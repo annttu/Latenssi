@@ -2,3 +2,6 @@
 
 class ConfigError(Exception):
     pass
+
+class ConnectionError(Exception):
+    pass

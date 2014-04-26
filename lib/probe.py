@@ -1,72 +1,49 @@
-#!/usr/bin/env python
 # encoding: utf-8
 
-"""
-Probe template class
-"""
+from lib import config, exceptions
 
-from lib import config
+probe_types = {}
 
-from threading import Thread
-import subprocess
-import logging
-import re
-import time
+probes = []
+probes_dict = {}
 
-# kapsi.fi : xmt/rcv/%loss = 5/5/0%, min/avg/max = 0.00/0.91/1.40
+probe_cache = {}
 
-fping_success = re.compile("^(?P<dest>[\w\d:\.-]+) : xmt/rcv/%loss = (?P<xmt>\d+)/(?P<rcv>\d+)/(?P<loss>\d+)%, min/avg/max = (?P<min>\d+.\d\d)/(?P<avg>\d+.\d\d)/(?P<max>\d+.\d\d)$")
+def create_probe(host, probe):
+    """
+    Initialize probe class
+    host = hostname
+    name = probe name
+    """
+    if probe not in probe_cache:
+        if probe not in config.probes:
+            raise exceptions.ConfigError("No probe named %s" % probe)
+        if 'type' not in config.probes[probe]:
+            raise exceptions.ConfigError("Error parsing probe %s, type is mandatory variable for probe" % probe)
+        if config.probes[probe]['type'] not in probe_types:
+            raise exceptions.ConfigError("Invalid probe type %s" % config.probes[probe]['type'])
+        opts = {}
+        for k,v in config.probes[probe].items():
+            if k not in ['type']:
+                opts[k] = v
+        # Create anonymous wrapper for probe
+        probe_cache[probe] = lambda x: probe_types[config.probes[probe]['type']](x, **opts)
+    p = probe_cache[probe](host)
+    probes.append(p)
+    probes_dict[p.name] = p
 
+def populate():
+    """
+    Initialize configured probes
+    """
+    if probes:
+        # Populate only once
+        return
+    for hostname, host in config.hosts.items():
+        for p in host['probes']:
+            create_probe(hostname, p)
 
-logger = logging.getLogger("ping")
-
-class Probe(Thread):
-    def __init__(self, target):
-        Thread.__init__(self)
-        self.target = target
-        self._stop = False
-        if '_name' not in vars(self):
-            self._name = self.__class__.__name__
-        self.name = "%s-%s" % (self._name.lower(), target.replace(".", "_"))
-        self.title = "%s %s" % (self._name, target)
-
-    def stop(self):
-        """
-        Stop thread
-        """
-        self._stop = True
-        self.sync(force=True)
-        self._kill()
-
-
-    def _kill(self):
-        """
-        Kill processes, save state etc
-        """
-        pass
-
-    def main(self):
-        """
-        This functions is looped forever,
-        add probe functionality to this function
-        """
-        pass
-
-    def run(self):
-        logger.info("Starting probe %s" % self.name)
-        while not self._stop:
-            start = time.time()
-            try:
-                self.main()
-            except Exception as e:
-                logger.exception(e)
-                logger.error("Error occured on probe %s, suspended for 5 seconds" % self.name)
-                time.sleep(5)
-                continue
-            # Busyloop quard
-            if (time.time() - start) < 1.0:
-                logger.error("Probe finished too fast, trottling")
-                time.sleep(1)
-                continue
-
+def register_probe(name, module):
+    if name not in probe_types:
+        probe_types[name] = module
 

@@ -13,6 +13,8 @@ graph_height = 500
 fping = "/usr/bin/fping"
 fping6 = "/usr/bin/fping6"
 
+mtr = "/usr/bin/mtr"
+
 # Graph intervals
 intervals = {
    'hour': 3600,
@@ -31,6 +33,7 @@ sync_interval = 59
 
 hosts = {}
 probes = {}
+remotes = {}
 
 
 def load_config(config):
