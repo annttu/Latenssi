@@ -11,7 +11,7 @@ import time
 logger = logging.getLogger("Thread")
 
 class Thread(threading.Thread):
-    def __init__(self, target):
+    def __init__(self):
         threading.Thread.__init__(self)
         self._stop = False
         if '_name' not in vars(self):
