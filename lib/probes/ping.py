@@ -13,7 +13,7 @@ import time
 
 # kapsi.fi : xmt/rcv/%loss = 5/5/0%, min/avg/max = 0.00/0.91/1.40
 
-fping_success = re.compile("^(?P<dest>[\w\d:\.-]+) : xmt/rcv/%loss = (?P<xmt>\d+)/(?P<rcv>\d+)/(?P<loss>\d+)%, min/avg/max = (?P<min>\d+.\d\d)/(?P<avg>\d+.\d\d)/(?P<max>\d+.\d\d)$")
+fping_success = re.compile("^(?P<dest>[\w\d:\.-]+) : xmt/rcv/%loss = (?P<xmt>\d+)/(?P<rcv>\d+)/(?P<loss>\d+)%, min/avg/max = (?P<min>\d+.\d+)/(?P<avg>\d+.\d+)/(?P<max>\d+.\d+)$")
 
 
 logger = logging.getLogger("ping")
