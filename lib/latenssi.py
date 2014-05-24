@@ -6,11 +6,6 @@ from lib import rrd, config, probe, web, probes
 import settings
 
 from time import sleep
-import logging
-
-logging.basicConfig()
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
 
 setting_vars = vars(settings)
 config.load_config(setting_vars)
