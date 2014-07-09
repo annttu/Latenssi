@@ -14,7 +14,8 @@ import time
 # kapsi.fi : xmt/rcv/%loss = 5/5/0%, min/avg/max = 0.00/0.91/1.40
 
 fping_success = re.compile("^(?P<dest>[\w\d:\.-]+) : xmt/rcv/%loss = (?P<xmt>\d+)/(?P<rcv>\d+)/(?P<loss>\d+)%, min/avg/max = (?P<min>\d+.\d+)/(?P<avg>\d+.\d+)/(?P<max>\d+.\d+)$")
-
+fping_dups = re.compile("^(?P<dest>[\w\d:\.-]+) : xmt/rcv/%return = (?P<xmt>\d+)/(?P<rcv>\d+)/(?P<return>\d+)%, min/avg/max = (?P<min>\d+.\d+)/(?P<avg>\d+.\d+)/(?P<max>\d+.\d+)$")
+fping_failed = re.compile("^(?P<dest>[\w\d:\.-]+) : xmt/rcv/%loss = (?P<xmt>\d+)/(?P<rcv>\d+)/(?P<loss>\d+)%$")
 
 logger = logging.getLogger("ping")
 
@@ -37,11 +38,24 @@ class Ping(probe.Probe):
     def handle_line(self, line):
         if line.startswith('[') or not line:
             return
+        out = None
         m = fping_success.match(line.strip())
-        if not m:
+        if m:
+            out = m.groupdict()
+        if not out:
+            m = fping_dups.match(line.strip())
+            if m:
+                out = m.groupdict()
+                out['loss'] = 0.0
+                out['rvc'] = out['xmt']
+        if not out:
+            m = fping_failed.match(line.strip())
+            if m:
+                out = m.groupdict()
+                out['avg'] = 0.0
+        if not out:
             logger.error("Invalid line %s" % line)
             return
-        out = m.groupdict()
         out['timestamp'] = int(time.time() - 2.5) # timestamp at center of metering time
         if int(out['rcv']) > self._count:
             logger.debug("Totals %s" % (out, ))
