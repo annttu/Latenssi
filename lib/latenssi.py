@@ -7,6 +7,9 @@ import settings
 
 from time import sleep
 
+import logging
+logger = logging.getLogger("Latenssi")
+
 setting_vars = vars(settings)
 config.load_config(setting_vars)
 probe.populate()
