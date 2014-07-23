@@ -1,10 +1,14 @@
 # encoding: utf-8
 
 data_dir = "rrd_data"
-graph_dir = "/var/www/latency/img"
+# Path to document root
 html_dir = "/var/www/latency"
+# Image dir, should be inside html_dir
+graph_dir = "/var/www/latency/img"
+# Relative path on browser
 relative_path = "/latecy/"
 
+# Use fcgi to generate graphs
 dynamic_graphs = True
 
 probes = {
@@ -18,6 +22,7 @@ probes = {
     }
 }
 
+# configure targets
 hosts = {
     'google.com': {'probes': ['ping', 'ping6']},
 }

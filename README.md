@@ -11,7 +11,7 @@ Installation
     . env/bin/activate
     pip install -r requirements.txt
 
-Modify variables on settings.py and configure probes on probes.py
+Modify variables on settings.py
 
 Author
 ======
