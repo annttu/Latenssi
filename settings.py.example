@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+# These are used only if this is server
 data_dir = "rrd_data"
 # Relative path on browser without last slash
 relative_path = "/latecy"
@@ -8,6 +9,20 @@ relative_path = "/latecy"
 
 bind_address = 'localhost'
 bind_port = 8080
+
+# listen address to listen remote probes.
+# set to None if no need.
+# listen_address = "tcp://*:5112"
+listen_address = None
+
+# Dictionary containing client ip-addresses and sha2 password hashes
+# Use scripts/create_password.py to create hash
+clients = {
+    '10.0.0.2': '{SHA256}0204VSFR0Z|6614648a91ec993e25d5a5069aea65cc8c6641335b3072a086d7b603a510c7b2'
+}
+
+# If this is client, configure server_address to point to server
+server_address = None
 
 probes = {
     'ping': {

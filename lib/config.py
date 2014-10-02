@@ -25,6 +25,15 @@ mtr = "/usr/bin/mtr"
 bind_address = 'localhost'
 bind_port = 8080
 
+clients = {}
+
+# Listen probes in this address
+# E.g. "tcp://*:5441"
+listen_address = None
+
+# Time to wait remote before timeout
+reply_timeout = 30
+
 # Graph intervals
 intervals = {
    'hour': 3600,

@@ -53,7 +53,7 @@ class Thread(threading.Thread):
                 continue
             # Busyloop quard
             if (time.time() - start) < self._throttle_limit:
-                logger.error("Probe main loop finished too fast, throttling")
+                logger.error("thread %s main loop finished too fast, throttling" % self.name)
                 time.sleep(self._throttle_time)
                 continue
 
