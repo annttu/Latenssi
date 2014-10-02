@@ -5,29 +5,36 @@ from lib import config, probe as lib_probe, rrd
 import os
 from jinja2 import Environment, FileSystemLoader
 import logging
+from bottle import Bottle
+
+webapp = Bottle()
 
 logger = logging.getLogger("web")
 
-class LatenssiWeb(object):
+class LatenssiTemplateGenerator(object):
     def __init__(self):
         self.env = None
 
     def _create_env(self):
         if not self.env:
-            self.env = Environment(loader=FileSystemLoader(os.path.join(os.path.dirname(__file__), '../templates/')))
+            self.env = Environment(loader=FileSystemLoader(os.path.join(
+                                    os.path.dirname(__file__),'../templates/')))
 
     def generate(self, filename, template, opts={}):
+        filename = os.path.join(config.html_dir, filename)
+        f = open(filename, 'wb')
+        f.write(self.output(template, opts))
+        f.close()
+
+    def output(self, template, opts):
         opts['config'] = config
         self._create_env()
         logger.info("Generating page %s" % filename)
         logger.debug("Options: %s" % (opts,))
-        filename = os.path.join(config.html_dir, filename)
-        f = open(filename, 'wb')
         tmpl = self.env.get_template(template)
-        f.write(tmpl.render(**opts).encode("utf-8"))
-        f.close()
+        return tmpl.render(**opts).encode("utf-8")
 
-webgenerator = LatenssiWeb()
+webgenerator = LatenssiTemplateGenerator()
 
 def generate_filename(name, interval=None):
     name = name.replace('.','_')
@@ -39,7 +46,10 @@ def generate_filename(name, interval=None):
 def generate_intervals(name, current=None):
     ret = []
     for interval in config.intervals.keys():
-        keys = {'active': False, 'link': generate_filename(name, interval), 'name': interval}
+        keys = { 'active': False,
+                 'link': generate_filename(name, interval),
+                 'name': interval
+               }
         if interval == current:
             keys['active'] = True
         ret.append(keys)
