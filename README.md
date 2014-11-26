@@ -4,6 +4,9 @@ Latenssi
 Simple network latency grapher. Currently only ping is supported.
 Dynamic graph generation supported.
 
+![Screenshot](external/screenshot.png)
+
+
 Installation
 ============
 
