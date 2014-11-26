@@ -1,8 +1,7 @@
 Latenssi
 ========
 
-Simple network latency grapher. Currently only ping is supported.
-Dynamic graph generation supported.
+Simple network latency grapher. Currently ping and dns are supported.
 
 ![Screenshot](external/screenshot.png)
 
