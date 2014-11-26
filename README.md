@@ -13,6 +13,41 @@ Installation
 
 Modify variables on settings.py
 
+Modules
+======
+
+ping
+----
+Uses fping for ipv4 and fping6 for ipv6.
+
+Protocol (4,6) can be selected using protocol option in plugin definition.
+
+
+DNS
+---
+
+Do dns queries and measures query time.
+
+Options
+
+* <b>query</b>, name to query
+* <b>protocol</b>, tcp or udp
+* <b>method</b>, A, AAAA, MX ...
+* <b>interval</b>, how often to perform the query, default 5 
+
+mtr
+---
+
+Uses mtr and records latency for all routers on the way.
+
+<b>Warning!</b> Can cause big amount of rrd files if route changes often!
+
+
+External dependencies
+============
+* fping and fping6 for ping module
+* mtr for mtr module
+
 Author
 ======
 

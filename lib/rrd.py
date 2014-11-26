@@ -7,14 +7,17 @@ import os
 from datetime import datetime
 import time
 from threading import Thread, Lock
+import string
 
 logger = logging.getLogger("RRD")
 
 ptime = time
 
 class RRDFile(object):
-    def __init__(self, name, title=None):
+    def __init__(self, name, title=None, step=5, field_name="ping"):
         self.name = name.replace('.','_')
+        self.step = step
+        self.field_name = ''.join([x for x in field_name if x in string.ascii_letters + ' -_'])
         if title:
             self.title = title
         else:
@@ -27,10 +30,10 @@ class RRDFile(object):
     def create(self):
         if os.path.exists(self.filename):
             return
-        rrdtool.create(self.filename, '--step', '5', '--start', '%s' % (int(time.time()) - 60),
+        rrdtool.create(self.filename, '--step', str(self.step), '--start', '%s' % (int(time.time()) - 60),
                        '--no-overwrite',
-                       'DS:ping:GAUGE:5:0:30000',
-                       'DS:miss:GAUGE:5:0:5',
+                       'DS:ping:GAUGE:%s:0:30000' % str(self.step+2),
+                       'DS:miss:GAUGE:%s:0:5' % str(self.step+2),
                        'RRA:LAST:0.0:1:535680', # Save one month data with 5 sec resolution
                        'RRA:LAST:0.0:1:535680', # Save one month data with 5 sec resolution
                        'RRA:AVERAGE:0.5:1:535680', # Save one month data with 5 sec resolution
@@ -151,7 +154,7 @@ class RRDFile(object):
                 'AREA:ping_min#FFFFFF',
                 #'LINE1:ping_longterm#909090',
                 #'LINE1:ping_midterm#606060',
-                'LINE2:ping#7FFF00:Ping',
+                'LINE2:ping#7FFF00:' + self.field_name,
                 'GPRINT:ping:AVERAGE:\t\tAvg\: %6.2lf ms\t',
                 'GPRINT:ping:MIN:\tMin\: %6.2lf ms\t',
                 'GPRINT:ping:MAX:\tMax\: %6.2lf ms\\n',
@@ -185,10 +188,10 @@ class RRDManager(Thread):
         self._stop = True
         self.sync()
 
-    def register(self, name, title=None):
+    def register(self, name, *args, **kwargs):
         name = utils.sanitize(name)
         if name not in self.rrds:
-            self.rrds[name] = RRDFile(name, title=title)
+            self.rrds[name] = RRDFile(name, *args, **kwargs)
 
     def update(self, name, ping, miss=0, time='N'):
         self.register(name)
@@ -202,9 +205,9 @@ class RRDManager(Thread):
             self._name_cache[name] = os.path.isfile(os.path.join(config.data_dir, '%s.rrd' % name))
         return self._name_cache[name]
 
-    def graph(self, name, *args, **kwargs):
+    def get_graph(self, name):
         """
-        Graph rrd by name `name'
+        Get RRDFile object by name `name'
         """
         name = utils.sanitize(name)
 
@@ -214,7 +217,14 @@ class RRDManager(Thread):
         if name not in self.rrds:
             self.rrds[name] = RRDFile(name)
 
-        return self.rrds[name].graph(*args, **kwargs)
+        return self.rrds[name]
+
+    def graph(self, name, *args, **kwargs):
+        """
+        Graph rrd by name `name'
+        """
+        r = self.get_graph(name)
+        return r.graph(*args, **kwargs)
 
     def sync(self):
         for rrd in self.rrds.values():

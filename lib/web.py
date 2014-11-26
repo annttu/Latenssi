@@ -52,7 +52,8 @@ def generate_pages():
             graphs = []
             for graph in probe.graphs():
                 if not config.dynamic_graphs:
-                    img = os.path.join(config.relative_path, 'img/', os.path.basename(rrd.RRD.get_graphfile(graph)))
+                    r = rrd.RRD.get_graph(graph)
+                    img = os.path.join(config.relative_path, 'img/', os.path.basename(r.filename))
                 else:
                     img = os.path.join(config.relative_path, 'graph.fcgi?graph=%s&interval=%s&name=%s' % (graph, interval, probe.name))
                 graphs.append({'img': img, 'name': graph})

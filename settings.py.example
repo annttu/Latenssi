@@ -19,11 +19,24 @@ probes = {
     'ping6': {
         'type': 'ping',
         'protocol': 6
+    },
+    'dns': {
+        'type': 'dns',
+        'query': 'google.com',
+        'protocol': 'udp',
+        'method': 'A'
+    },
+    'dns6': {
+        'type': 'dns',
+        'query': 'google.com',
+        'protocol': 'udp',
+        'method': 'AAAA'
     }
 }
 
 # configure targets
 hosts = {
     'google.com': {'probes': ['ping', 'ping6']},
+    '8.8.8.8': {'probes': ['dns']}
 }
 
