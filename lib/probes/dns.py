@@ -11,6 +11,7 @@ from lib.rrd import RRD
 from lib import config
 from lib.probe import register_probe
 from lib.probes import probe
+from lib import utils
 
 import subprocess
 
@@ -23,16 +24,16 @@ import time
 logger = logging.getLogger("dns")
 
 class Dns(probe.Probe):
-    def __init__(self, target, method="A", query="a.fi", protocol="udp", interval=5):
+    def __init__(self, target, method="A", query="a.fi", protocol="udp", interval=5, name=None):
         self.method = method
         self.query = query
         self.protocol = protocol
         self._interval = 5
         self.tcp = protocol.lower() == "tcp"
         self._name = 'DNS'
-        super(Dns, self).__init__(target)
-        self.name = "%s-%s-%s-%s-%s" % (self._name.lower(), target.replace(".", "_"), method.upper(),
-                                     query.replace(".", "_"), protocol.lower())
+        super(Dns, self).__init__(target, name=name)
+        self.name = "%s-%s-%s-%s-%s" % (self._name.lower(), utils.sanitize(target), method.upper(),
+                                     utils.sanitize(query), protocol.lower())
         self._count = 3
         RRD.register(self.name, '%s %s IN %s @%s %s' % (self._name, self.query, self.method, self.target, self.protocol),
                      step=self._interval*self._count, field_name="query time")
@@ -50,6 +51,8 @@ class Dns(probe.Probe):
         miss = 0
         measurement_time = int(time.time())
         for i in range(3):
+            if self._stop:
+                return
             try:
                 x = time.time()
                 self.resolver.query(self.query, self.method, tcp=self.tcp)

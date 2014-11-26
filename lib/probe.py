@@ -9,7 +9,7 @@ probes_dict = {}
 
 probe_cache = {}
 
-def create_probe(host, probe):
+def create_probe(host, probe, options):
     """
     Initialize probe class
     host = hostname
@@ -27,8 +27,12 @@ def create_probe(host, probe):
             if k not in ['type']:
                 opts[k] = v
         # Create anonymous wrapper for probe
-        probe_cache[probe] = lambda x: probe_types[config.probes[probe]['type']](x, **opts)
-    p = probe_cache[probe](host)
+        probe_cache[probe] = lambda x, y: probe_types[config.probes[probe]['type']](x, name=y, **opts)
+    if 'name' in options:
+        name = options['name']
+    else:
+        name = host
+    p = probe_cache[probe](host, name)
     probes.append(p)
     probes_dict[p.name] = p
 
@@ -41,7 +45,7 @@ def populate():
         return
     for hostname, host in config.hosts.items():
         for p in host['probes']:
-            create_probe(hostname, p)
+            create_probe(hostname, p, host)
 
 def register_probe(name, module):
     if name not in probe_types:

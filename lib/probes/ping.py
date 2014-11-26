@@ -20,10 +20,10 @@ fping_failed = re.compile("^(?P<dest>[\w\d:\.-]+) : xmt/rcv/%loss = (?P<xmt>\d+)
 logger = logging.getLogger("ping")
 
 class Ping(probe.Probe):
-    def __init__(self, target, protocol=4):
+    def __init__(self, target, protocol=4, name=None):
         self.protocol = protocol
         self._name = 'Ping%s' % self.protocol
-        super(Ping, self).__init__(target)
+        super(Ping, self).__init__(target, name=name)
         self.p = None
         self._count = 5
         RRD.register(self.name, '%s %s' % (self._name, self.target))

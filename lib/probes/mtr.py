@@ -48,11 +48,11 @@ class Hop(object):
 
 
 class MTR(probe.Probe):
-    def __init__(self, target, protocol=4, interval=5):
+    def __init__(self, target, protocol=4, interval=5, name=None):
         self.protocol = protocol
         self.interval = int(interval)
         self._name = 'MTR%s' % self.protocol
-        super(MTR, self).__init__(target)
+        super(MTR, self).__init__(target, name=name)
         self.p = None
         self._count = 5
         self.opts = [config.mtr]
