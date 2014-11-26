@@ -66,7 +66,7 @@ class Dns(probe.Probe):
                 time.sleep(30)
             time.sleep(self._interval)
         rtime = rtime / float(self._count - miss)
-        print("TIME: %s, miss: %s, time: %s" % (rtime, miss, measurement_time))
+        logging.debug("%s, time: %s, miss: %s, time: %s" % (self.name, rtime, miss, measurement_time))
         RRD.update(self.name, time=measurement_time, ping=float(rtime), miss=miss)
 
     def main(self):
