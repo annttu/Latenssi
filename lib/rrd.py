@@ -175,6 +175,52 @@ class RRDFile(object):
         logger.debug("%s updated" % graphfile)
         return out
 
+    def fetch(self, cf="AVERAGE", start=None, end=None, resolution=None):
+        args = [self.filename, cf]
+        if start is not None:
+            args.append('--start')
+            if isinstance(start, datetime):
+                start = int(start.strftime("%s"))
+            elif isinstance(start, (int, float)):
+                start = str(int(start))
+            else:
+                raise ValueError("Invalid start time")
+            args.append(str(start))
+        if end is not None:
+            args.append('--end')
+            if isinstance(end, datetime):
+                end = int(end.strftime("%s"))
+            elif isinstance(end, (int, float)):
+                end = int(end)
+            else:
+                raise ValueError("Invalid start time")
+            args.append(str(end))
+        if start is not None and end is not None:
+            if start > end:
+                raise ValueError("Start should be smaller than end!")
+        if resolution is not None:
+            args.append('--resolution')
+            if isinstance(resolution, int):
+                args.append(str(resolution))
+            else:
+                raise ValueError("Invalid resolution value")
+        vars = rrdtool.fetch(*args)
+        out = []
+        (s, e, step) = vars[0]
+        keys = vars[1]
+        for i in vars[2]:
+            notnull = False
+            for a in i:
+                if a is not None:
+                    notnull = True
+            if not notnull:
+                continue
+            x = dict(zip(keys, i))
+            x['time'] = int(s)
+            out.append(x)
+            s += step
+        return out
+
 
 class RRDManager(Thread):
     def __init__(self):
