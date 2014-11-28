@@ -1,2 +1,5 @@
 Jinja2==2.7.3
+bottle==0.12.7
 pycrypto==2.6.1
+rrdtool==0.1.1
+dnspython==1.12.0
