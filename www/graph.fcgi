@@ -8,7 +8,7 @@ from urlparse import urlparse, parse_qs
 import time
 import tempfile
 
-LATENSSI="/home/users/annttu/Latenssi"
+LATENSSI="/path/to/Latenssi"
 
 sys.path.insert(0, LATENSSI)
 
