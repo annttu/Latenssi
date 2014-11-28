@@ -29,55 +29,91 @@ class LatenssiTemplateGenerator(object):
     def output(self, template, opts):
         opts['config'] = config
         self._create_env()
-        logger.info("Generating page %s" % filename)
         logger.debug("Options: %s" % (opts,))
         tmpl = self.env.get_template(template)
         return tmpl.render(**opts).encode("utf-8")
 
 webgenerator = LatenssiTemplateGenerator()
 
-def generate_filename(name, interval=None):
-    name = name.replace('.','_')
-    if interval and interval != config.default_interval:
-        interval = interval.replace('.','_')
-        return "%s-%s.html" % (name, interval)
-    return "%s.html" % name
 
-def generate_intervals(name, current=None):
-    ret = []
-    for interval in config.intervals.keys():
-        keys = { 'active': False,
-                 'link': generate_filename(name, interval),
-                 'name': interval
-               }
-        if interval == current:
-            keys['active'] = True
-        ret.append(keys)
-    return sorted(ret, key=lambda x: config.intervals[x['name']])
+def generate_probename(name):
+    return name.replace('.','_')
 
-def generate_pages():
-    for interval in config.intervals:
-        pages = []
-        for probe in lib_probe.probes:
-            graphs = []
-            for graph in probe.graphs():
-                if not config.dynamic_graphs:
-                    r = rrd.RRD.get_graph(graph)
-                    img = os.path.join(config.relative_path, 'img/', os.path.basename(r.filename))
-                else:
-                    img = os.path.join(config.relative_path, 'graph.fcgi?graph=%s&interval=%s&name=%s' % (graph, interval, probe.name))
-                graphs.append({'img': img, 'name': graph})
-            filename = generate_filename(probe.name, interval)
-            opts = {
-                'host': {'name': probe.title,
-                    'probes': graphs,
-                 },
-                 'intervals': generate_intervals(probe.name, interval),
-                 'index': generate_filename('index', interval),
-            }
-            if not graphs:
-                continue
-            webgenerator.generate(filename, 'host.html', opts)
-            pages.append({'link': filename, 'name': probe.name ,'title': probe.title, 'img': "%s&width=800&height=400" % opts['host']['probes'][0]['img']})
-        index_filename = generate_filename('index', interval)
-        webgenerator.generate(index_filename, 'index.html', {'pages': pages, 'intervals': generate_intervals('index', interval)})
+
+class WebPage(object):
+    def __init__(self, name, title):
+        self.name = name
+        self.title = title
+
+    def get_path(self, interval=None):
+        prefix="%s" % config.relative_path
+        if self.name not in ['index']:
+            prefix = "%s/%s" % (prefix, self.name)
+        if interval and interval != config.default_interval:
+            interval = interval.replace('.','_')
+            return "%s/%s" % (prefix, interval)
+        return "/%s" % prefix.lstrip("/")
+
+    def generate_intervals(self, current=None):
+        ret = []
+        for interval in config.intervals.keys():
+            keys = { 'active': False,
+                     'link': self.get_path(interval),
+                     'name': interval
+                   }
+            if interval == current:
+                keys['active'] = True
+            ret.append(keys)
+        return sorted(ret, key=lambda x: config.intervals[x['name']])
+
+
+class ProbeWeb(WebPage):
+    def __init__(self, probe):
+        super(ProbeWeb, self).__init__(generate_probename(probe.name), probe.title)
+        self.probe = probe
+
+    def get_path(self, interval=None):
+        prefix="%s" % config.relative_path
+        if interval and interval != config.default_interval:
+            interval = interval.replace('.','_')
+            return "/%s/probes/%s/%s" % (prefix.lstrip("/"), self.name, interval)
+        return "/%s/probes/%s" % (prefix.lstrip("/"), self.name)
+
+    def get_graphs(self):
+        return self.probe.graphs()
+
+    def get_graph_urls(self, interval=None):
+        if not interval:
+            interval = config.default_interval
+        graphs = []
+        for graph in self.get_graphs():
+            if not config.dynamic_graphs:
+                r = rrd.RRD.get_graph(graph)
+                img = os.path.join(config.relative_path, 'img/', os.path.basename(r.filename))
+            else:
+                img = os.path.join(config.relative_path, 'graph/%s/?interval=%s&name=%s' % (graph, interval, self.name))
+            graphs.append({'img': img, 'name': graph})
+        return graphs
+
+    def get_index_graph(self, interval=None):
+        return "%s&width=800&height=400" % self.get_graph_urls(interval)[0]['img']
+
+
+probe_cache = {}
+
+def populate_probe_cache():
+    if probe_cache:
+        return
+    for probe in lib_probe.probes:
+        p = ProbeWeb(probe)
+        probe_cache[p.name] = p
+
+def get_probe(name):
+    populate_probe_cache()
+    if name in probe_cache:
+        return probe_cache[name]
+    return None
+
+def get_probes():
+    populate_probe_cache()
+    return probe_cache

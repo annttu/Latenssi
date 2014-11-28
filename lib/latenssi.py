@@ -3,15 +3,21 @@
 
 
 from lib import rrd, config, probe, web, probes
+
+
 import settings
+
+setting_vars = vars(settings)
+config.load_config(setting_vars)
+
+from lib.routes import *
 
 from time import sleep
 
 import logging
 logger = logging.getLogger("Latenssi")
 
-setting_vars = vars(settings)
-config.load_config(setting_vars)
+
 probe.populate()
 
 def graph():
@@ -29,6 +35,9 @@ def html():
     Generate html files
     """
     web.generate_pages()
+
+def webdaemon():
+    web.webapp.run()
 
 def daemon():
     # Generate html files on startup
