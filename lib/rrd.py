@@ -182,7 +182,7 @@ class RRDFile(object):
             if isinstance(start, datetime):
                 start = int(start.strftime("%s"))
             elif isinstance(start, (int, float)):
-                start = str(int(start))
+                start = int(start)
             else:
                 raise ValueError("Invalid start time")
             args.append(str(start))
