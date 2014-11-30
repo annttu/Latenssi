@@ -175,7 +175,7 @@ class RRDFile(object):
         logger.debug("%s updated" % graphfile)
         return out
 
-    def fetch(self, cf="AVERAGE", start=None, end=None, resolution=None):
+    def fetch(self, cf="AVERAGE", start=None, end=None, resolution=None, nulls=False):
         args = [self.filename, cf]
         if start is not None:
             args.append('--start')
@@ -208,15 +208,17 @@ class RRDFile(object):
         out = []
         (s, e, step) = vars[0]
         keys = vars[1]
+        offset = time.timezone if (time.localtime().tm_isdst == 0) else time.altzone
         for i in vars[2]:
             notnull = False
             for a in i:
                 if a is not None:
                     notnull = True
-            if not notnull:
+            if not notnull and nulls is False:
+                s += step
                 continue
             x = dict(zip(keys, i))
-            x['time'] = int(s)
+            x['time'] = int(s) - offset
             out.append(x)
             s += step
         return out

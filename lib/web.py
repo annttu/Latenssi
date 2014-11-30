@@ -82,6 +82,14 @@ class ProbeWeb(WebPage):
     def get_graphs(self):
         return self.probe.graphs()
 
+    def get_data_names(self, interval=None):
+        if not interval:
+            interval = config.default_interval
+        graphs = []
+        for graph in self.get_graphs():
+            graphs.append({'id': graph, 'name': graph})
+        return graphs
+
     def get_graph_urls(self, interval=None):
         if not interval:
             interval = config.default_interval

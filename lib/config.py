@@ -28,6 +28,8 @@ intervals = {
 
 default_interval = 'day'
 
+devel = False
+
 # How often flush collected data to rrdfile
 sync_interval = 59
 

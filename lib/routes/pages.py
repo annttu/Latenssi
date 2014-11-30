@@ -7,13 +7,23 @@ import os
 import time
 import json
 
-from bottle import abort, request, response, redirect
+from bottle import abort, request, response, redirect, static_file
 
 import logging
 
 logger = logging.getLogger("pages")
 
 indexpage = web.WebPage("index", "Index")
+
+def full_path(x):
+    return "%s%s" % (config.relative_path.rstrip("/"), x)
+
+
+if config.relative_path.lstrip("/") != "":
+    @web.webapp.get("/")
+    @web.webapp.get("")
+    def callback():
+        return redirect(full_path("/"))
 
 def index(interval):
     if interval not in config.intervals.keys():
@@ -31,6 +41,13 @@ def index(interval):
 
     return web.webgenerator.output("index.html", {'pages': pages, 'intervals': indexpage.generate_intervals()})
 
+
+@web.webapp.route(full_path('/static/<path:path>'))
+def callback(path):
+    root = os.path.join(os.path.dirname(__file__), '../../www/static')
+    return static_file(path, root=root)
+
+
 def probepage(probe, interval):
     if interval not in config.intervals.keys():
         abort(404, "Invalid interval")
@@ -38,18 +55,9 @@ def probepage(probe, interval):
     if not p:
         abort(404, "Not such probe")
 
-    return web.webgenerator.output("host.html", {'host': {'name': p.title, 'probes': p.get_graph_urls(interval)},
+    return web.webgenerator.output("host.html", {'host': {'name': p.title, 'probes': p.get_data_names(interval)},
                                                  'intervals': p.generate_intervals(),
                                                  'index': indexpage.get_path(interval)})
-
-def full_path(x):
-    return "%s%s" % (config.relative_path.rstrip("/"), x)
-
-if config.relative_path.lstrip("/") != "":
-    @web.webapp.get("/")
-    @web.webapp.get("")
-    def callback():
-        return redirect(full_path("/"))
 
 
 @web.webapp.get(full_path(""))
@@ -160,8 +168,17 @@ def callback(graph):
         else:
             start = int(time.time() - config.intervals[interval])
 
+    nulls = True
+    if 'nulls' in params:
+       if params['nulls'] == "false" or params['nulls'] == "0":
+           nulls = False
+
     g = rrd.RRD.get_graph(graph)
 
     response.set_header('Content-Type', 'application/json')
 
-    return json.dumps(g.fetch(start=int(start), end=int(end)))
+    d = {"min": g.fetch(cf="MIN", start=int(start), end=int(end), nulls=nulls),
+         "avg": g.fetch(cf="AVERAGE", start=int(start), end=int(end), nulls=nulls),
+         "max": g.fetch(cf="MAX", start=int(start), end=int(end), nulls=nulls)}
+
+    return json.dumps(d)

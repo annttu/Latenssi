@@ -37,11 +37,9 @@ def html():
     web.generate_pages()
 
 def webdaemon():
-    web.webapp.run()
+    web.webapp.run(reloader=config.devel)
 
 def daemon():
-    # Generate html files on startup
-    html()
     childs = []
     for p in probe.probes:
         childs.append(p)
