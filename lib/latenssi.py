@@ -37,7 +37,7 @@ def html():
     web.generate_pages()
 
 def webdaemon():
-    web.webapp.run(reloader=config.devel)
+    web.webapp.run(host=config.bind_address, port=config.bind_port, reloader=config.devel)
 
 def daemon():
     childs = []

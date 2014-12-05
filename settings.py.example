@@ -1,12 +1,13 @@
 # encoding: utf-8
 
 data_dir = "rrd_data"
-# Path to document root
-html_dir = "/var/www/latency"
-# Image dir, should be inside html_dir
-graph_dir = "/var/www/latency/img"
 # Relative path on browser
 relative_path = "/latecy/"
+
+# Web app config
+
+bind_address = 'localhost'
+bind_port = 8080
 
 probes = {
     'ping': {

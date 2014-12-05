@@ -13,6 +13,11 @@ fping6 = "/usr/bin/fping6"
 
 mtr = "/usr/bin/mtr"
 
+# Web application config
+
+bind_address = 'localhost'
+bind_port = 8080
+
 # Graph intervals
 intervals = {
    'hour': 3600,
