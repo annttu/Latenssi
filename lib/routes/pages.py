@@ -55,7 +55,7 @@ def probepage(probe, interval):
     if not p:
         abort(404, "Not such probe")
 
-    return web.webgenerator.output("host.html", {'host': {'name': p.title, 'probes': p.get_data_names(interval)},
+    return web.webgenerator.output("host.html", {'host': {'name': p.title, 'probes': p.get_graph_urls(interval)},
                                                  'intervals': p.generate_intervals(),
                                                  'index': indexpage.get_path(interval)})
 
