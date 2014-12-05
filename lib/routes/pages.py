@@ -32,8 +32,8 @@ def index(interval):
     pages = []
     for probename, probe in web.get_probes().items():
         pages.append({
-            "title": probe.name,
-            "name": probe.title,
+            "title": probe.title,
+            "name": probe.name,
             "img": probe.get_index_graph(interval),
             "link": probe.get_path(interval)
         })
