@@ -14,6 +14,15 @@ Installation
     pip install -r requirements.txt
 
 Modify variables on settings.py
+Start collector
+
+    ./latenssi.py collector
+
+Start application server
+
+    ./latenssi.py web
+
+Connect to http://localhost:8080/
 
 Modules
 ======
@@ -54,6 +63,16 @@ Author
 ======
 
 * Antti 'Annttu' Jaakkola
+
+
+Misc
+====
+
+Running with gunicorn
+
+    . env/bin/activate
+    gunicorn -w 4 -b 127.0.0.1:8080 wsgi:app
+
 
 License
 =======

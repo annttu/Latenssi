@@ -4,3 +4,4 @@ env/
 settings.py
 www/index.html
 www/*-*.html
+rrd_data

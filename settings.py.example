@@ -8,9 +8,6 @@ graph_dir = "/var/www/latency/img"
 # Relative path on browser
 relative_path = "/latecy/"
 
-# Use fcgi to generate graphs
-dynamic_graphs = True
-
 probes = {
     'ping': {
         'type': 'ping',

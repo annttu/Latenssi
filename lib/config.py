@@ -5,8 +5,6 @@ graph_dir = "/var/www/latency/img"
 html_dir = "/var/www/latency"
 relative_path = "/latency/"
 
-dynamic_graphs = True
-
 graph_width = 1100
 graph_height = 500
 

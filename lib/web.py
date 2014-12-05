@@ -95,11 +95,7 @@ class ProbeWeb(WebPage):
             interval = config.default_interval
         graphs = []
         for graph in self.get_graphs():
-            if not config.dynamic_graphs:
-                r = rrd.RRD.get_graph(graph)
-                img = os.path.join(config.relative_path, 'img/', os.path.basename(r.filename))
-            else:
-                img = os.path.join(config.relative_path, 'graph/%s/?interval=%s&name=%s' % (graph, interval, self.name))
+            img = os.path.join(config.relative_path, 'graph/%s/?interval=%s&name=%s' % (graph, interval, self.name))
             graphs.append({'img': img, 'name': graph})
         return graphs
 
