@@ -209,18 +209,47 @@ class RRDFile(object):
         (s, e, step) = vars[0]
         keys = vars[1]
         offset = time.timezone if (time.localtime().tm_isdst == 0) else time.altzone
-        for i in vars[2]:
-            notnull = False
-            for a in i:
-                if a is not None:
-                    notnull = True
-            if not notnull and nulls is False:
+        if resolution > (step * 2):
+            data = {}
+            seconds = 0
+            for i in vars[2]:
+                x = dict(zip(keys, i))
+                for k,v in x.items():
+                    if k not in data:
+                        data[k] = []
+                    if v is not None:
+                        data[k].append(v)
+                seconds += step
+                if seconds < resolution:
+                    s += step
+                    continue
+                # do aggregation
+                x = {}
+                notnull = False
+                for k, v in data.items():
+                    if len(v) == 0:
+                        x[k] = None
+                    else:
+                        notnull = True
+                        x[k] = sum(v) / len(v)
+                x['time'] = int(s) - offset
+                if notnull or nulls is True:
+                    out.append(x)
+                seconds = 0
                 s += step
-                continue
-            x = dict(zip(keys, i))
-            x['time'] = int(s) - offset
-            out.append(x)
-            s += step
+        else:
+            for i in vars[2]:
+                notnull = False
+                for a in i:
+                    if a is not None:
+                        notnull = True
+                if not notnull and nulls is False:
+                    s += step
+                    continue
+                x = dict(zip(keys, i))
+                x['time'] = int(s) - offset
+                out.append(x)
+                s += step
         return out
 
 
