@@ -151,7 +151,7 @@ def callback(graph):
             abort(400, "Invalid start time")
             return
     else:
-        start = int(time.time() - 3600 * 24)
+        start = int(time.time() - 86400)
     if 'end' in params:
         try:
             end = int(params['end'])
@@ -160,14 +160,15 @@ def callback(graph):
             return
     else:
         end = int(time.time())
+    interval = config.default_interval
     if 'interval' in params:
         interval = params['interval']
         if interval not in config.intervals.keys():
             abort(400, "Invalid interval")
             return
         else:
-            start = int(time.time() - config.intervals[interval])
-
+            start = int(end - config.intervals[interval])
+    interval = config.intervals[interval]
     nulls = True
     if 'nulls' in params:
        if params['nulls'] == "false" or params['nulls'] == "0":
@@ -177,8 +178,26 @@ def callback(graph):
 
     response.set_header('Content-Type', 'application/json')
 
-    d = {"min": g.fetch(cf="MIN", start=int(start), end=int(end), nulls=nulls),
-         "avg": g.fetch(cf="AVERAGE", start=int(start), end=int(end), nulls=nulls),
-         "max": g.fetch(cf="MAX", start=int(start), end=int(end), nulls=nulls)}
+    resolution = 5
+    if interval > 5000:
+        resolution = int(resolution * (interval / 5000))
+
+    mins = g.fetch(cf="MIN", start=int(start), end=int(end), nulls=nulls, resolution=resolution)
+    avgs = g.fetch(cf="AVERAGE", start=int(start), end=int(end), nulls=nulls, resolution=resolution)
+    maxes = g.fetch(cf="MAX", start=int(start), end=int(end), nulls=nulls, resolution=resolution)
+
+    #keys = [x for x in mins[0].keys() if x != "time"]
+
+    #times = {}
+    #def add_time(t):
+    #    times[t] = {k: {"min": None, "avg": None, "max": None} for k in keys}
+    #for i in mins:
+    #    if mins["time"] not in times:
+    #        add_time(mins["time"])
+    #    times[mins["time"]]["min"] = mins["ping"]
+
+    d = {"min": mins,
+         "avg": avgs,
+         "max": maxes}
 
     return json.dumps(d)
