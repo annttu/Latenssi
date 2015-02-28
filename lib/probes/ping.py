@@ -89,7 +89,7 @@ class Ping(probe.Probe):
             self.p.terminate()
         stderr = self.p.stderr.readlines()
         if self.p.returncode != 0:
-            logger.error("Got non zero return value from fping")
+            logger.error("Got non zero return value from fping to %s" % (self.target,))
             logger.error("Suspending for 5 seconds")
             time.sleep(5)
             return
