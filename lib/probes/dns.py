@@ -68,7 +68,10 @@ class Dns(probe.Probe):
                 logging.error("Got unexpected error from %s" % self.target)
                 time.sleep(30)
             time.sleep(self._interval)
-        rtime = rtime / float(self._count - miss)
+        if self._count > miss:
+            rtime = rtime / float(self._count - miss)
+        else:
+            rtime = 0.0
         logging.debug("%s, time: %s, miss: %s, time: %s" % (self.name, rtime, miss, measurement_time))
         RRD.update(self.name, time=measurement_time, ping=float(rtime), miss=miss)
 
