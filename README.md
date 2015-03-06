@@ -9,9 +9,16 @@ Simple network latency grapher. Currently ping and dns are supported.
 Installation
 ============
 
-    virtualenv env --python=python2.7
+Install some packages first
+
+    apt-get install python-dev librrd-dev python-rrdtool
+
+Install and setup Python virtualenv
+
+    virtualenv env --python=python2.7 --system-site-packages
     . env/bin/activate
     pip install -r requirements.txt
+    mkdir rrd_data
 
 Modify variables on settings.py
 Start collector
