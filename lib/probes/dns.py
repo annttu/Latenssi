@@ -106,4 +106,4 @@ class Dns(probe.Probe):
             return
 
 
-register_probe('dns',Dns)
+register_probe('dns', Dns)
