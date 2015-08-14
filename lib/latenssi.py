@@ -36,7 +36,11 @@ def settings_changed():
     modification_time = os.path.getmtime(settings_file)
     if modification_time > settings_imported:
         logger.info("Settings changes")
-        reload(settings)
+        try:
+            reload(settings)
+        except SyntaxError:
+            logger.exception("Settings file have an syntax error")
+            return False
         load_settings()
         settings_imported = modification_time
         return True
