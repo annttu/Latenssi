@@ -1,6 +1,9 @@
 # encoding: utf-8
 
 from lib import config, exceptions
+import logging
+
+logger = logging.getLogger("Probe")
 
 probe_types = {}
 
@@ -9,7 +12,7 @@ probes_dict = {}
 
 probe_cache = {}
 
-def create_probe(host, probe, options):
+def create_probe(host, probe, options, start=False):
     """
     Initialize probe class
     host = hostname
@@ -33,19 +36,43 @@ def create_probe(host, probe, options):
     else:
         name = host
     p = probe_cache[probe](host, name)
-    probes.append(p)
-    probes_dict[p.name] = p
+    if p.name not in probes_dict:
+        logger.info("Adding new probe %s" % p.name)
+        probes.append(p)
+        probes_dict[p.name] = p
+        if start:
+            p.start()
+    else:
+        logger.info("Skipping already added probe %s" % p.name)
+    return p
 
-def populate():
+
+def populate(reload=False):
     """
     Initialize configured probes
     """
-    if probes:
+    global probe_cache
+    if probes and not reload:
         # Populate only once
         return
+    elif reload:
+        logger.info("Adding missing probes...")
+        probe_cache = {}
+    probe_threads = []
     for hostname, host in config.hosts.items():
         for p in host['probes']:
-            create_probe(hostname, p, host)
+            probe_thread = create_probe(hostname, p, host, start=reload)
+            probe_threads.append(probe_thread.name)
+    if reload:
+        logger.info("Removing missing probes...")
+        for probe in probes:
+            if probe.name not in probe_threads:
+                logger.info("Stopping removed probe %s" % probe.name)
+                probe.stop()
+                del probes_dict[probe.name]
+                i = probes.index(probe)
+                del probes[i]
+
 
 def register_probe(name, module):
     if name not in probe_types:

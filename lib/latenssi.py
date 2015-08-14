@@ -4,11 +4,17 @@
 
 from lib import rrd, config, probe, web, probes
 
+import os
+import time
 
 import settings
 
-setting_vars = vars(settings)
-config.load_config(setting_vars)
+
+def load_settings():
+    setting_vars = vars(settings)
+    config.load_config(setting_vars)
+
+load_settings()
 
 from lib.routes import *
 
@@ -17,8 +23,25 @@ from time import sleep
 import logging
 logger = logging.getLogger("Latenssi")
 
+settings_imported = time.time()
 
 probe.populate()
+
+
+def settings_changed():
+    global settings_imported
+    settings_file = settings.__file__
+    if settings_file.endswith('.pyc'):
+        settings_file = settings_file[:-1]
+    modification_time = os.path.getmtime(settings_file)
+    if modification_time > settings_imported:
+        logger.info("Settings changes")
+        reload(settings)
+        load_settings()
+        settings_imported = modification_time
+        return True
+    return False
+
 
 def graph():
     """
@@ -52,10 +75,12 @@ def daemon():
     try:
         while True:
             sleep(10)
+            if settings_changed():
+                probe.populate(reload=True)
     except KeyboardInterrupt as e:
         pass
     except Exception as e:
-        pass
+        logger.exception("Unhandled exception")
 
 
     for child in childs:
