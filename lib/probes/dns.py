@@ -6,6 +6,7 @@ DNS probe for latenssi
 """
 
 from __future__ import absolute_import
+import socket
 
 from lib.rrd import RRD
 from lib import config
@@ -28,12 +29,13 @@ class Dns(probe.Probe):
         self.method = method
         self.query = query
         self.protocol = protocol
-        self._interval = 5
+        self._interval = interval
         self.tcp = protocol.lower() == "tcp"
         self._name = 'DNS'
         super(Dns, self).__init__(target, name=name)
-        self.name = "%s-%s-%s-%s-%s" % (self._name.lower(), utils.sanitize(target), method.upper(),
-                                     utils.sanitize(query), protocol.lower())
+        self.name = "%s-%s-%s-%s-%s" % (self._name.lower(), utils.sanitize(self.target),
+                                        self.method.upper(),
+                                        utils.sanitize(self.query), protocol.lower())
         self._count = 3
         RRD.register(self.name, '%s %s IN %s @%s %s' % (self._name, self.query, self.method, self.target, self.protocol),
                      step=self._interval*self._count, field_name="query time")
@@ -49,6 +51,22 @@ class Dns(probe.Probe):
     def do_round(self):
         rtime = 0
         miss = 0
+
+        # Set resolver address if address is name
+
+
+        if self.target[-1].isalpha():
+            address = []
+            a = utils.get_ipv6_by_name(self.target)
+            if a:
+                address.append(a)
+            a = utils.get_ipv4_by_name(self.target)
+            address.append(a)
+            if not address:
+                logger.error("Cannot resolve address for server %s" % self.target)
+                return
+            self.resolver.nameservers = address
+
         measurement_time = int(time.time())
         for i in range(3):
             if self._stop:
@@ -64,8 +82,8 @@ class Dns(probe.Probe):
             except dns.exception.DNSException:
                 logging.error("Got NXDOMAIN from %s, suspending for a moment" % self.target)
                 time.sleep(30)
-            except dns.exception.DNSException:
-                logging.error("Got unexpected error from %s" % self.target)
+            except Exception:
+                logging.exception("Got unexpected error from %s" % self.target)
                 time.sleep(30)
             time.sleep(self._interval)
         if self._count > miss:
@@ -88,4 +106,4 @@ class Dns(probe.Probe):
             return
 
 
-register_probe('dns',Dns)
+register_probe('dns', Dns)

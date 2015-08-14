@@ -1,8 +1,8 @@
 # encoding: utf-8
 
 data_dir = "rrd_data"
-# Relative path on browser
-relative_path = "/latecy/"
+# Relative path on browser without last slash
+relative_path = "/latecy"
 
 # Web app config
 

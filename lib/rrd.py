@@ -77,9 +77,16 @@ class RRDFile(object):
                 logger.info("Updating point %s to %s" % (point, self.filename))
                 rrdtool.update(self.filename, point)
             self.cache = []
+
         except Exception as e:
-            logger.error("Cannot save points to file %s" % self.filename)
-            logger.exception(e)
+            if '(minimum one second step)' in str(e):
+                # Software was restarted too quickly
+                # Fix by dropping one measurement from beginning
+                logger.error("Two measurements for same time, dropping one %s" % self.filename)
+                self.cache = self.cache[1:]
+            else:
+                logger.error("Cannot save points to file %s" % self.filename)
+                logger.exception(e)
         if len(self.cache) > 500:
             # don't cache forever, drop from begin
             while len(self.cache) < 500:
