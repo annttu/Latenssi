@@ -35,7 +35,7 @@ def settings_changed():
         settings_file = settings_file[:-1]
     modification_time = os.path.getmtime(settings_file)
     if modification_time > settings_imported:
-        logger.info("Settings changes")
+        logger.warn("Settings changes")
         try:
             reload(settings)
         except SyntaxError:

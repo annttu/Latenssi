@@ -37,7 +37,8 @@ def create_probe(host, probe, options, start=False):
         name = host
     p = probe_cache[probe](host, name)
     if p.name not in probes_dict:
-        logger.info("Adding new probe %s" % p.name)
+        if reload:
+            logger.warn("Adding new probe %s" % p.name)
         probes.append(p)
         probes_dict[p.name] = p
         if start:
@@ -67,7 +68,7 @@ def populate(reload=False):
         logger.info("Removing missing probes...")
         for probe in probes:
             if probe.name not in probe_threads:
-                logger.info("Stopping removed probe %s" % probe.name)
+                logger.warn("Stopping removed probe %s" % probe.name)
                 probe.stop()
                 del probes_dict[probe.name]
                 i = probes.index(probe)
