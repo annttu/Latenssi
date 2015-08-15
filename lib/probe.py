@@ -66,13 +66,16 @@ def populate(reload=False):
             probe_threads.append(probe_thread.name)
     if reload:
         logger.info("Removing missing probes...")
+        to_remove = []
         for probe in probes:
             if probe.name not in probe_threads:
                 logger.warn("Stopping removed probe %s" % probe.name)
                 probe.stop()
-                del probes_dict[probe.name]
-                i = probes.index(probe)
-                del probes[i]
+                to_remove.append(probe)
+        for probe in to_remove:
+            del probes_dict[probe.name]
+            i = probes.index(probe)
+            del probes[i]
 
 
 def register_probe(name, module):
