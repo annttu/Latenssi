@@ -2,49 +2,18 @@
 # encoding: utf-8
 
 
-from lib import rrd, config, probe, web, probes
+from lib import rrd, config, config_utils, probe, web, probes
+from time import sleep
+import logging
 
-import os
-import time
-
-import settings
-
-
-def load_settings():
-    setting_vars = vars(settings)
-    config.load_config(setting_vars)
-
-load_settings()
+config_utils.load_config()
 
 from lib.routes import *
 
-from time import sleep
-
-import logging
 logger = logging.getLogger("Latenssi")
 
-settings_imported = time.time()
 
 probe.populate()
-
-
-def settings_changed():
-    global settings_imported
-    settings_file = settings.__file__
-    if settings_file.endswith('.pyc'):
-        settings_file = settings_file[:-1]
-    modification_time = os.path.getmtime(settings_file)
-    if modification_time > settings_imported:
-        logger.warn("Settings changes")
-        try:
-            reload(settings)
-        except SyntaxError:
-            logger.exception("Settings file have an syntax error")
-            return False
-        load_settings()
-        settings_imported = modification_time
-        return True
-    return False
 
 
 def graph():
@@ -63,8 +32,16 @@ def html():
     """
     web.generate_pages()
 
+
 def webdaemon():
-    web.webapp.run(host=config.bind_address, port=config.bind_port, reloader=config.devel)
+    reloader = config_utils.ConfigReloader(start_pollers=False)
+    reloader.start()
+    try:
+        web.webapp.run(host=str(config.bind_address), port=int(config.bind_port), reloader=bool(config.devel))
+    except KeyboardInterrupt:
+        pass
+    reloader.stop()
+
 
 def daemon():
     childs = []
@@ -76,11 +53,13 @@ def daemon():
     for child in childs:
         child.start()
 
+    reloader = config_utils.ConfigReloader()
+    reloader.start()
+    childs.append(reloader)
+
     try:
         while True:
-            sleep(10)
-            if settings_changed():
-                probe.populate(reload=True)
+            sleep(5)
     except KeyboardInterrupt as e:
         pass
     except Exception as e:

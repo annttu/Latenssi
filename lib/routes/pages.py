@@ -30,7 +30,7 @@ def index(interval):
         abort(404, "Invalid interval")
 
     pages = []
-    for probename, probe in web.get_probes().items():
+    for probename, probe in web.ProbeCache.get_all().items():
         pages.append({
             "title": probe.title,
             "name": probe.name,
@@ -51,7 +51,7 @@ def callback(path):
 def probepage(probe, interval):
     if interval not in config.intervals.keys():
         abort(404, "Invalid interval")
-    p = web.get_probe(probe)
+    p = web.ProbeCache.get(probe)
     if not p:
         abort(404, "Not such probe")
 

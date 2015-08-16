@@ -1,4 +1,5 @@
 # encoding: utf-8
+import time
 
 from lib import config, probe as lib_probe, rrd
 
@@ -103,21 +104,29 @@ class ProbeWeb(WebPage):
         return "%s&width=800&height=400" % self.get_graph_urls(interval)[0]['img']
 
 
-probe_cache = {}
+class ProbeCache(object):
+    def __init__(self):
+        self._cache = {}
+        self._last_updated = None
+        self.update()
 
-def populate_probe_cache():
-    if probe_cache:
-        return
-    for probe in lib_probe.probes:
-        p = ProbeWeb(probe)
-        probe_cache[p.name] = p
+    def update(self):
+        if self._cache and config.last_updated < self._last_updated:
+            return
+        self._cache = {}
+        for probe in lib_probe.probes:
+            p = ProbeWeb(probe)
+            self._cache[p.name] = p
+        self._last_updated = time.time()
 
-def get_probe(name):
-    populate_probe_cache()
-    if name in probe_cache:
-        return probe_cache[name]
-    return None
+    def get(self, name):
+        self.update()
+        if name in self._cache:
+            return self._cache[name]
+        return None
 
-def get_probes():
-    populate_probe_cache()
-    return probe_cache
+    def get_all(self):
+        self.update()
+        return self._cache
+
+ProbeCache = ProbeCache()

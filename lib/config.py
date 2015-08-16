@@ -1,5 +1,9 @@
 # encoding: utf-8
 
+import time
+
+last_updated = time.time()
+
 data_dir = "rrd_data"
 graph_dir = "/var/www/latency/img"
 html_dir = "/var/www/latency"
@@ -41,9 +45,3 @@ probes = {}
 remotes = {}
 
 
-def load_config(config):
-    global_vars = globals()
-    for k, v in config.items():
-        if k.startswith('_'):
-            continue
-        global_vars[k] = v

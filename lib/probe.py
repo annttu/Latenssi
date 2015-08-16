@@ -42,13 +42,14 @@ def create_probe(host, probe, options, start=False):
         probes.append(p)
         probes_dict[p.name] = p
         if start:
+            logger.warn("Starting probe %s" % p.name)
             p.start()
     else:
         logger.info("Skipping already added probe %s" % p.name)
     return p
 
 
-def populate(reload=False):
+def populate(reload=False, autostart=False):
     """
     Initialize configured probes
     """
@@ -62,15 +63,19 @@ def populate(reload=False):
     probe_threads = []
     for hostname, host in config.hosts.items():
         for p in host['probes']:
-            probe_thread = create_probe(hostname, p, host, start=reload)
+            probe_thread = create_probe(hostname, p, host, start=autostart)
             probe_threads.append(probe_thread.name)
     if reload:
-        logger.info("Removing missing probes...")
+        logger.info("Removing removed probes...")
         to_remove = []
         for probe in probes:
             if probe.name not in probe_threads:
                 logger.warn("Stopping removed probe %s" % probe.name)
-                probe.stop()
+                if probe.is_alive:
+                    try:
+                        probe.stop()
+                    except Exception:
+                        logger.exception("Got unhandled exception while stopping probe")
                 to_remove.append(probe)
         for probe in to_remove:
             del probes_dict[probe.name]
