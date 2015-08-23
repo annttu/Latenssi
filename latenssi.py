@@ -9,7 +9,7 @@ logging.basicConfig()
 logger = logging.getLogger()
 logger.setLevel(logging.WARN)
 
-from lib import latenssi
+from lib import latenssi, config_utils
 
 def start_collector(args):
     latenssi.daemon()

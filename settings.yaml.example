@@ -1,0 +1,43 @@
+---
+
+data_dir: "rrd_data"
+# Relative path on browser without last slash
+relative_path: "/latecy"
+
+# Web app config
+
+bind_address: 'localhost'
+bind_port: 8080
+
+#fping: "/usr/local/bin/fping"
+#fping6: "/usr/local/bin/fping6"
+
+probes:
+    ping:
+        type: ping
+        protocol: 4
+    ping6:
+        type: ping
+        protocol: 6
+    dns:
+        type: dns
+        query: "google.com"
+        protocol: udp
+        method: A
+    dns6:
+        type: dns,
+        query: "google.com"
+        protocol: udp
+        method: AAAA
+
+# configure targets
+hosts:
+    'google.com':
+        probes:
+            - ping
+            - ping6
+    '8.8.8.8':
+         probes:
+             - dns
+
+

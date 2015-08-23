@@ -2,6 +2,7 @@ env/
 *.pyc
 *.swp
 settings.py
+settings.yaml
 www/index.html
 www/*-*.html
 rrd_data

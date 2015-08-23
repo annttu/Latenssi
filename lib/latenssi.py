@@ -1,12 +1,17 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-
-from lib import rrd, config, config_utils, probe, web, probes
+import sys
+from lib import rrd, config, config_utils, probe, web, probes, exceptions
 from time import sleep
 import logging
 
-config_utils.load_config()
+try:
+    config_utils.load_config()
+except exceptions.ConfigError as e:
+    print(e)
+    sys.exit(1)
+
 
 from lib.routes import *
 
