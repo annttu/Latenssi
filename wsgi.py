@@ -1,4 +1,3 @@
-from lib import latenssi, web
+from lib import latenssi
 
-
-app = web.webapp
+app = latenssi.get_webdaemon()

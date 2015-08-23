@@ -71,6 +71,8 @@ class ConfigReloader(thread.Thread):
 
     def __init__(self, start_pollers=True):
         thread.Thread.__init__(self)
+        # This is a daemon thread
+        self.daemon = True
         self.start_pollers = start_pollers
         logger.info("Starting config reloader!")
 

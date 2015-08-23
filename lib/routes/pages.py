@@ -19,7 +19,7 @@ indexpage = web.WebPage("index", "Index")
 def probe_sorter(probe_tuple):
     """
     Split probe name to tuples containing target address in reverse order and probe type.
-    
+
     Eg. "Ping latenssi.link" results ('link', 'latenssi', 'ping')
 
     This makes probes to appear in logical order.

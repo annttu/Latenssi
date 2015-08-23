@@ -38,14 +38,18 @@ def html():
     web.generate_pages()
 
 
-def webdaemon():
+def get_webdaemon():
     reloader = config_utils.ConfigReloader(start_pollers=False)
     reloader.start()
+    return web.webapp
+
+
+def webdaemon(run=True):
+    d = get_webdaemon()
     try:
-        web.webapp.run(host=str(config.bind_address), port=int(config.bind_port), reloader=bool(config.devel))
+        d.run(host=str(config.bind_address), port=int(config.bind_port), reloader=bool(config.devel))
     except KeyboardInterrupt:
         pass
-    reloader.stop()
 
 
 def daemon():
