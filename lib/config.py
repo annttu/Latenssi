@@ -12,6 +12,9 @@ relative_path = "/latency/"
 graph_width = 1100
 graph_height = 500
 
+upper_limit = 1000
+lower_limit = 0
+
 fping = "/usr/bin/fping"
 fping6 = "/usr/bin/fping6"
 
