@@ -273,6 +273,9 @@ class RRDManager(Thread):
         self.sync()
 
     def register(self, name, *args, **kwargs):
+        """
+        Register new file
+        """
         name = utils.sanitize(name)
         if name not in self.rrds:
             self.rrds[name] = RRDFile(name, *args, **kwargs)

@@ -26,7 +26,6 @@ class Ping(probe.Probe):
         super(Ping, self).__init__(target, name=name)
         self.p = None
         self._count = 5
-        RRD.register(self.name, '%s %s' % (self._name, self.target))
 
     def _kill(self):
         if self.p and self.p.returncode is not None:
@@ -65,6 +64,7 @@ class Ping(probe.Probe):
 
     def main(self):
         logger.debug("Starting fping to %s" % self.target)
+        RRD.register(self.name, '%s %s' % (self._name, self.target))
         if self.protocol == 6:
             ping = config.fping6
         else:

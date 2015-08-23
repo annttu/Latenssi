@@ -37,8 +37,6 @@ class Dns(probe.Probe):
                                         self.method.upper(),
                                         utils.sanitize(self.query), protocol.lower())
         self._count = 3
-        RRD.register(self.name, '%s %s IN %s @%s %s' % (self._name, self.query, self.method, self.target, self.protocol),
-                     step=self._interval*self._count, field_name="query time")
         self._timeout = 5
         self.resolver = dns.resolver.Resolver()
         self.resolver.nameservers = [self.target]
@@ -95,6 +93,9 @@ class Dns(probe.Probe):
 
     def main(self):
         logger.debug("Starting dns to %s %s IN %s @%s %s" % (self._name, self.query, self.method, self.target, self.protocol))
+
+        RRD.register(self.name, '%s %s IN %s @%s %s' % (self._name, self.query, self.method, self.target, self.protocol),
+                     step=self._interval*self._count, field_name="query time")
 
         while not self._stop:
             try:
