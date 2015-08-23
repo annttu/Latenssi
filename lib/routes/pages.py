@@ -15,6 +15,18 @@ logger = logging.getLogger("pages")
 
 indexpage = web.WebPage("index", "Index")
 
+
+def probe_sorter(probe_tuple):
+    """
+    Split probe name to tuples containing target address in reverse order and probe type.
+    
+    Eg. "Ping latenssi.link" results ('link', 'latenssi', 'ping')
+
+    This makes probes to appear in logical order.
+    """
+    return tuple(reversed(probe_tuple[1].probe.target.split('.'))) + (probe_tuple[1].probe._name,)
+
+
 def full_path(x):
     return "%s%s" % (config.relative_path.rstrip("/"), x)
 
@@ -25,12 +37,15 @@ if config.relative_path.lstrip("/") != "":
     def callback():
         return redirect(full_path("/"))
 
+
 def index(interval):
     if interval not in config.intervals.keys():
         abort(404, "Invalid interval")
 
     pages = []
-    for probename, probe in web.ProbeCache.get_all().items():
+    all_probes = web.ProbeCache.get_all().items()
+    # List probes in sorted order
+    for probename, probe in sorted(all_probes, key=probe_sorter):
         pages.append({
             "title": probe.title,
             "name": probe.name,
