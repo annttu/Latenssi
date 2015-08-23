@@ -49,6 +49,12 @@ class RRDFile(object):
     def update(self, ping, miss=0, time="N"):
         if time == 'N':
             time = int(ptime.time())
+        if ping > config.upper_limit:
+            logger.warn("Discarding too big value %s from %s" % (ping, self.filename))
+            return
+        elif ping < config.upper_limit:
+            logger.warn("Discarding too small value %s from %s" % (ping, self.filename))
+            return
         logger.debug("Adding datapoint %s,%s to %s @ %s" % (ping, miss, self.filename, time))
         self.cache.append((time, ping, miss))
 

@@ -62,7 +62,7 @@ def load_config(reload=False):
         if k.startswith('_'):
             continue
         if reload:
-            if k not in ['probes', 'hosts']:
+            if k not in ['probes', 'hosts', 'upper_limit', 'lower_limit']:
                 continue
         setattr(config_object, k, v)
 
