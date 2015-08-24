@@ -15,6 +15,10 @@ bind_port = 8080
 # listen_address = "tcp://*:5112"
 listen_address = None
 
+# Send results to remote server
+# E.g. tcp://10.0.0.2:5221
+server_address = None
+
 # Dictionary containing client ip-addresses and sha2 password hashes
 # Use scripts/create_password.py to create hash
 clients = {

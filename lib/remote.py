@@ -22,7 +22,7 @@ class RemoteServer(Thread):
     """
     This class is used if Latenssi operates as server
 
-    TODO: check that bind_address is configured
+    TODO: check that listen_address is configured
     """
     def __init__(self):
 
@@ -34,8 +34,8 @@ class RemoteServer(Thread):
         self.context = zmq.Context()
         #self.server = self.context.socket(zmq.REP)
         self.server = self.context.socket(zmq.ROUTER)
-        self.server.identity = config.bind_address
-        self.server.bind("tcp://%s" % (config.bind_address,))
+        self.server.identity = config.listen_address
+        self.server.bind("tcp://%s" % (config.listen_address,))
 
     def handler(self, probe, subprobe, value):
         """

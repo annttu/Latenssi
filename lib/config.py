@@ -31,6 +31,9 @@ clients = {}
 # E.g. "tcp://*:5441"
 listen_address = None
 
+# Server address
+server_address = None
+
 # Time to wait remote before timeout
 reply_timeout = 30
 
