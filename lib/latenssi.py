@@ -66,6 +66,10 @@ def daemon():
     reloader.start()
     childs.append(reloader)
 
+    remoteloader = config_utils.RemoteConfigLoader()
+    remoteloader.start()
+    childs.append(remoteloader)
+
     try:
         while True:
             sleep(5)

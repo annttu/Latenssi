@@ -9,6 +9,7 @@ import logging
 from lib import thread, probe
 from lib import config as config_object
 from lib.exceptions import ConfigError
+import requests
 
 _reload = reload
 
@@ -17,6 +18,7 @@ logger = logging.getLogger("config_utils")
 SETTINGS_FILE = "settings.yaml"
 SETTINGS_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), "../", SETTINGS_FILE))
 
+REMOTE_CHANGES = False
 
 def check_config_file(path=None):
     if not path:
@@ -27,6 +29,7 @@ def check_config_file(path=None):
 
 
 def poll_settings_changed():
+    global REMOTE_CHANGES
     settings_file = SETTINGS_PATH
     #if settings_file.endswith('.pyc'):
     #    settings_file = settings_file[:-1]
@@ -38,6 +41,9 @@ def poll_settings_changed():
         except ConfigError as err:
             logger.error(err)
         config_object.last_updated = modification_time
+        return True
+    if REMOTE_CHANGES:
+        REMOTE_CHANGES = False
         return True
     return False
 
@@ -65,6 +71,30 @@ def load_config(reload=False):
             if k not in ['probes', 'hosts', 'upper_limit', 'lower_limit']:
                 continue
         setattr(config_object, k, v)
+
+class RemoteConfigLoader(thread.Thread):
+    def __init__(self):
+        thread.Thread.__init__(self)
+        self.daemon = True
+        logger.info("Starting remote config loader!")
+
+    def main(self):
+        global REMOTE_CHANGES
+        if config_object.master:
+            r = requests.get("%s/api/v1/probes" % config_object.master)
+            if r.status_code != 200:
+                logger.error("Failed to fetch probes from master %s" % (config_object.master,))
+                return
+            probes = r.json
+            r = requests.get("%s/api/v1/hosts" % config_object.master)
+            if r.status_code != 200:
+                logger.error("Failed to fetch hosts from master %s" % (config_object.master,))
+                return
+            hosts = r.json
+            setattr(config_object, 'probes', probes)
+            setattr(config_object, 'hosts', hosts)
+            REMOTE_CHANGES = True
+        time.sleep(360)
 
 
 class ConfigReloader(thread.Thread):

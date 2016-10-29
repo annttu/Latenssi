@@ -216,3 +216,23 @@ def callback(graph):
          "max": maxes}
 
     return json.dumps(d)
+
+def check_api_key(f, *args, **kwargs):
+    def callback():
+        if request.headers.get('X-Auth') in config.api_keys:
+            return f(*args, **kwargs)
+        return abort(401, "Unauthenticated")
+    return callback
+
+@web.webapp.get(full_path('/api/v1/probes'))
+@web.webapp.get(full_path('/api/v1/probes/'))
+@check_api_key
+def callback():
+    return config.probes
+
+@web.webapp.get(full_path('/api/v1/hosts'))
+@web.webapp.get(full_path('/api/v1/hosts/'))
+@check_api_key
+def callback():
+    return config.hosts
+

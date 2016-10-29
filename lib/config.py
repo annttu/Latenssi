@@ -47,5 +47,10 @@ hosts = {}
 probes = {}
 remotes = {}
 
+api_keys = []
 
+# Other probes
 probe_addresses = []
+
+# Address to master server
+master = None
