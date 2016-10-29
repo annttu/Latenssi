@@ -80,13 +80,14 @@ class RemoteConfigLoader(thread.Thread):
 
     def main(self):
         global REMOTE_CHANGES
-        if config_object.master:
-            r = requests.get("%s/api/v1/probes" % config_object.master)
+        if config_object.master and config_object.master_api_key:
+            headers = {'X-Auth': config_object.master_api_key}
+            r = requests.get("%s/api/v1/probes" % config_object.master, headers=headers)
             if r.status_code != 200:
                 logger.error("Failed to fetch probes from master %s" % (config_object.master,))
                 return
             probes = r.json
-            r = requests.get("%s/api/v1/hosts" % config_object.master)
+            r = requests.get("%s/api/v1/hosts" % config_object.master, headers=headers)
             if r.status_code != 200:
                 logger.error("Failed to fetch hosts from master %s" % (config_object.master,))
                 return
