@@ -86,12 +86,12 @@ class RemoteConfigLoader(thread.Thread):
             if r.status_code != 200:
                 logger.error("Failed to fetch probes from master %s" % (config_object.master,))
                 return
-            probes = r.json
+            probes = r.json()
             r = requests.get("%s/api/v1/hosts" % config_object.master, headers=headers)
             if r.status_code != 200:
                 logger.error("Failed to fetch hosts from master %s" % (config_object.master,))
                 return
-            hosts = r.json
+            hosts = r.json()
             setattr(config_object, 'probes', probes)
             setattr(config_object, 'hosts', hosts)
             REMOTE_CHANGES = True
