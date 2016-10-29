@@ -96,8 +96,12 @@ class ProbeWeb(WebPage):
             interval = config.default_interval
         graphs = []
         for graph in self.get_graphs():
-            img = os.path.join(config.relative_path, 'graph/%s/?interval=%s&name=%s' % (graph, interval, self.name))
-            graphs.append({'img': img, 'name': graph})
+            if config.probe_addresses:
+                for probe_address in config.probe_addresses:
+                    img = '/'.join(['http:/', probe_address, 'graph/%s/?interval=%s&name=%s' % (graph, interval, self.name)])
+                    graphs.append({'img': img, 'name': graph})
+            else:
+                img = os.path.join([config.relative_path, 'graph/%s/?interval=%s&name=%s' % (graph, interval, self.name)])
         return graphs
 
     def get_index_graph(self, interval=None):
