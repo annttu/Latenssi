@@ -11,16 +11,28 @@ Installation
 
 Install some packages first
 
-    apt-get install python-dev librrd-dev python-rrdtool
+    apt-get install python-dev librrd-dev python-rrdtool fping
+    yum install python python-devel rrdtool-devel python-rrdtool fping 
 
 Install and setup Python virtualenv
 
     virtualenv env --python=python2.7 --system-site-packages
     . env/bin/activate
     pip install -r requirements.txt
+
+Or install system packages (CentOS)
+    
+    yum install -y python-yaml python-requests python-jinja2 python-bottle python-dns
+
+Create data directory
+
     mkdir rrd_data
 
 Modify variables on settings.py
+
+Running
+=======
+
 Start collector
 
     ./latenssi.py collector
