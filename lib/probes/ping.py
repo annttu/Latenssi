@@ -10,6 +10,7 @@ import subprocess
 import logging
 import re
 import time
+import os.path
 
 # kapsi.fi : xmt/rcv/%loss = 5/5/0%, min/avg/max = 0.00/0.91/1.40
 
@@ -69,6 +70,9 @@ class Ping(probe.Probe):
             ping = config.fping6
         else:
             ping = config.fping
+        if not os.path.isfile(ping):
+            logger.error("fping program %s missing, cannot start probe" % ping)
+            return
         self.p = subprocess.Popen([ping, '-Q%s' % self._count,'-c60', self.target],
                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE) # Run 60sec reporting per 5 sec
         while not self._stop:
