@@ -40,13 +40,8 @@ hosts:
          probes:
              - dns
 
-#api_keys:
-#  - "asfasdfasdfasdfasdfasdf"  # test
-
+# Remote probes
 #probe_addresses:
-#     - "sample.remote.probe/latenssi"
+#  - "address/path"  # address and path to remote latenssi
 
-# Define master for this probe
-# Master provides probe and host configs via rest api
-# master: "http://master.example.com/latenssi
-# master_api_key:" asdfasdfasdfasdfasdf
+
