@@ -99,7 +99,7 @@ class ProbeWeb(WebPage):
             if config.probe_addresses:
                 for probe_address in config.probe_addresses:
                     img = '/'.join(['http:/', probe_address, 'graph/%s/?interval=%s&name=%s' % (graph, interval, self.name)])
-                    graphs.append({'img': img, 'name': graph})
+                    graphs.append({'img': img, 'name': graph, 'title': probe_address.split("/")[0]})
             else:
                 img = os.path.join([config.relative_path, 'graph/%s/?interval=%s&name=%s' % (graph, interval, self.name)])
         return graphs
