@@ -2,7 +2,7 @@
 
 data_dir: "rrd_data"
 # Relative path on browser without last slash
-relative_path: "/latecy"
+relative_path: "/latenssi"
 
 # Web app config
 
@@ -25,7 +25,7 @@ probes:
         protocol: udp
         method: A
     dns6:
-        type: dns,
+        type: dns
         query: "google.com"
         protocol: udp
         method: AAAA
@@ -43,5 +43,4 @@ hosts:
 # Remote probes
 #probe_addresses:
 #  - "address/path"  # address and path to remote latenssi
-
 
