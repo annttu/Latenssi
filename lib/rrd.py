@@ -15,7 +15,7 @@ ptime = time
 
 class RRDFile(object):
     def __init__(self, name, title=None, step=5, field_name="ping"):
-        self.name = name.replace('.','_')
+        self.name = utils.sanitize(name)
         self.step = step
         self.field_name = ''.join([x for x in field_name if x in string.ascii_letters + ' -_'])
         if title:

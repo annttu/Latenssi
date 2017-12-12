@@ -1,7 +1,7 @@
 # encoding: utf-8
 import time
 
-from lib import config, probe as lib_probe, rrd
+from lib import config, probe as lib_probe, rrd, sanitize
 
 import os
 from jinja2 import Environment, FileSystemLoader
@@ -38,7 +38,7 @@ webgenerator = LatenssiTemplateGenerator()
 
 
 def generate_probename(name):
-    return name.replace('.','_')
+    return utils.sanitize(name)
 
 
 class WebPage(object):
@@ -51,7 +51,7 @@ class WebPage(object):
         if self.name not in ['index']:
             prefix = "%s/%s" % (prefix, self.name)
         if interval and interval != config.default_interval:
-            interval = interval.replace('.','_')
+            interval = utils.sanitize(interval)
             return "%s/%s" % (prefix, interval)
         return "/%s" % prefix.lstrip("/")
 
@@ -76,7 +76,7 @@ class ProbeWeb(WebPage):
     def get_path(self, interval=None):
         prefix="%s" % config.relative_path
         if interval and interval != config.default_interval:
-            interval = interval.replace('.','_')
+            interval = utils.sanitize(interval)
             return "/%s/probes/%s/%s" % (prefix.lstrip("/"), self.name, interval)
         return "/%s/probes/%s" % (prefix.lstrip("/"), self.name)
 

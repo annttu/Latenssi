@@ -5,7 +5,7 @@
 Probe template class
 """
 
-from lib import config, thread
+from lib import config, thread, utils
 
 import subprocess
 import logging
@@ -19,7 +19,7 @@ class Probe(thread.Thread):
     def __init__(self, target, name=None):
         thread.Thread.__init__(self)
         self.target = target
-        self.name = "%s-%s" % (self._name.lower(), target.replace(".", "_"))
+        self.name = "%s-%s" % (self._name.lower(), utils.sanitize(target))
         if not name:
             name = target
         self.title = "%s %s" % (self._name, name)
