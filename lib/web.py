@@ -1,7 +1,8 @@
 # encoding: utf-8
 import time
 
-from lib import config, probe as lib_probe, rrd, sanitize
+from lib import config, probe as lib_probe, rrd
+from lib.utils import sanitize
 
 import os
 from jinja2 import Environment, FileSystemLoader
