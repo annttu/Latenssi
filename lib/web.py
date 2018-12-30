@@ -47,6 +47,10 @@ class WebPage(object):
     def __init__(self, name, title):
         self.name = name
         self.title = title
+        if len(title.split(None)) == 2:
+            h = config.hosts[title.split(None, 1)[1]]
+            if 'note' in h:
+                self.title = self.title + " (%s)" % h["note"]
 
     def get_path(self, interval=None):
         prefix="%s" % config.relative_path
