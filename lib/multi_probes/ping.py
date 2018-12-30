@@ -24,7 +24,7 @@ logger = logging.getLogger("multiping")
 class MultiPing(multi_probe.MultiProbe):
     def __init__(self, protocol=4):
         self.protocol = protocol
-        self._name = 'MultiPing%s' % self.protocol
+        self._name = 'Ping%s' % self.protocol
         super(MultiPing, self).__init__()
         self.p = None
         self._count = 5

@@ -97,8 +97,8 @@ def create_multi_probe(host, probe, options, start=False):
     if probe not in multi_probes_dict:
         logger.warn("Adding new multi probe %s" % probe)
         multi_probes_dict[probe] = multi_probe_cache[probe]()
-        logger.warn("Starting multi probe %s" % probe)
         if start:
+            logger.warn("Starting multi probe %s" % probe)
             multi_probes_dict[probe].start()
 
     multi_probes_dict[probe].add_host(host, name)

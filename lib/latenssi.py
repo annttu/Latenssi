@@ -57,6 +57,9 @@ def daemon():
     for p in probe.probes:
         childs.append(p)
 
+    for p in probe.multi_probes_dict.values():
+        childs.append(p)
+
     childs.append(rrd.RRD)
 
     for child in childs:
