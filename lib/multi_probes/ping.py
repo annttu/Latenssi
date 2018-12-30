@@ -85,9 +85,8 @@ class MultiPing(multi_probe.MultiProbe):
         self.p = subprocess.Popen(command, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE, stdin=subprocess.PIPE, encoding="utf-8")
         # Send hosts
-        logger.info("Sending hosts %s", '\n'.join(self.targets.keys()))
+        logger.debug("Sending hosts %s", '\n'.join(self.targets.keys()))
         self.p.stdin.write('\n'.join(self.targets.keys()))
-        #self.p.communicate('\n'.join(self.targets.keys()))
         self.p.stdin.close()
         while not self._stop:
             try:
@@ -117,11 +116,14 @@ class MultiPing(multi_probe.MultiProbe):
             stderr = self.p.stderr.readlines()
             stdout = self.p.stdout.readlines()
         if self.p.returncode != 0:
-            logger.error("Got non zero return value '%s' from fping to %s" % (self.p.returncode, self.targets.keys(),))
-            logger.debug('\n'.join(stderr))
-            logger.error('\n'.join(stdout))
-            logger.error("Suspending for 5 seconds")
-            time.sleep(5)
+            if self.p.returncode <= 2:
+                logger.info("Some of the hosts are unreachable")
+            else:
+                logger.error("Got non zero return value '%s' from fping to %s" % (self.p.returncode, self.targets.keys(),))
+                logger.debug('\n'.join(stderr))
+                logger.error('\n'.join(stdout))
+                logger.error("Suspending for 5 seconds")
+                time.sleep(5)
             return
 
 
