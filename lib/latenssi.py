@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 import sys
-from lib import rrd, config, config_utils, probe, web, probes, exceptions
+from lib import rrd, config, config_utils, probe, web, probes, multi_probes, exceptions
 from time import sleep
 import logging
 
