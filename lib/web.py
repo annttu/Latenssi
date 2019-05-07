@@ -39,7 +39,7 @@ webgenerator = LatenssiTemplateGenerator()
 
 
 def generate_probename(name):
-    return utils.sanitize(name)
+    return sanitize(name)
 
 
 class WebPage(object):
@@ -52,7 +52,7 @@ class WebPage(object):
         if self.name not in ['index']:
             prefix = "%s/%s" % (prefix, self.name)
         if interval and interval != config.default_interval:
-            interval = utils.sanitize(interval)
+            interval = sanitize(interval)
             return "%s/%s" % (prefix, interval)
         return "/%s" % prefix.lstrip("/")
 
@@ -77,7 +77,7 @@ class ProbeWeb(WebPage):
     def get_path(self, interval=None):
         prefix="%s" % config.relative_path
         if interval and interval != config.default_interval:
-            interval = utils.sanitize(interval)
+            interval = sanitize(interval)
             return "/%s/probes/%s/%s" % (prefix.lstrip("/"), self.name, interval)
         return "/%s/probes/%s" % (prefix.lstrip("/"), self.name)
 
