@@ -5,8 +5,10 @@
 <h1>{{ host.name }}</h1>
 {% for probe in host.probes %}
 <div class="probe">
-	<h2>from {{probe.title}}</h2>
-	<img src="{{probe.img}}" alt="graph">
+    <h2>from {{probe.title}}</h2>
+    <img id="img-{{probe.title}}" src="{{probe.img}}" alt="graph">
+    <a href='javascript:goback("{{probe.title}}");'>Back</a>
+    <a href='javascript:goforward("{{probe.title}}");'>Forward</a>
 </div>
 {% endfor %}
 {% endblock %}
