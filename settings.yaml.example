@@ -40,7 +40,8 @@ hosts:
          probes:
              - dns
 
-# Remote probes
-#probe_addresses:
-#  - "address/path"  # address and path to remote latenssi
+# Probes
+probe_addresses:
+  - "localhost:8080/latenssi"  # address and path to this latenssi
+#  - "remote:8080/latenssi"  # Address to another latenssi instance
 
