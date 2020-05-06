@@ -99,8 +99,13 @@ class ProbeWeb(WebPage):
         for graph in self.get_graphs():
             if config.probe_addresses:
                 for probe_address in config.probe_addresses:
-                    img = '/'.join(['http:/', probe_address, 'graph/%s/?interval=%s&name=%s' % (graph, interval, self.name)])
-                    graphs.append({'img': img, 'name': graph, 'title': probe_address.split("/")[0]})
+                    url_parts = []
+                    if "://" not in probe_address:
+                       url_parts.append("http:/")
+                    url_parts.append(probe_address)
+                    url_parts.append('graph/%s/?interval=%s&name=%s' % (graph, interval, self.name))
+                    img = '/'.join(url_parts)
+                    graphs.append({'img': img, 'name': graph, 'title': probe_address.split("://")[-1].split("/")[0]})
             else:
                 img = os.path.join([config.relative_path, 'graph/%s/?interval=%s&name=%s' % (graph, interval, self.name)])
         return graphs
