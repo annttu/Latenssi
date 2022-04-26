@@ -58,7 +58,7 @@ class WebPage(object):
 
     def generate_intervals(self, current=None):
         ret = []
-        for interval in config.intervals.keys():
+        for interval in list(config.intervals.keys()):
             keys = { 'active': False,
                      'link': self.get_path(interval),
                      'name': interval

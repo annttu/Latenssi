@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # encoding: utf-8
 
 import logging
@@ -29,4 +29,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     if args.debug:
         logger.setLevel(logging.DEBUG)
+    if 'func' not in args:
+        parser.print_help()
+        sys.exit(1)
     args.func(args)

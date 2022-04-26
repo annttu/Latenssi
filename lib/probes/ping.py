@@ -23,7 +23,7 @@ logger = logging.getLogger("ping")
 class Ping(probe.Probe):
     def __init__(self, target, protocol=4, name=None):
         self.protocol = protocol
-        self._name = 'Ping%s' % self.protocol
+        self._probe_name = 'Ping%s' % self.protocol
         super(Ping, self).__init__(target, name=name)
         self.p = None
         self._count = 5
@@ -65,7 +65,7 @@ class Ping(probe.Probe):
 
     def main(self):
         logger.debug("Starting fping to %s" % self.target)
-        RRD.register(self.name, '%s %s' % (self._name, self.target))
+        RRD.register(self.name, '%s %s' % (self._probe_name, self.target))
         if self.protocol == 6:
             ping = config.fping6
         else:
@@ -74,7 +74,8 @@ class Ping(probe.Probe):
             logger.error("fping program %s missing, cannot start probe" % ping)
             return
         self.p = subprocess.Popen([ping, '-Q%s' % self._count,'-c60', self.target],
-                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE) # Run 60sec reporting per 5 sec
+                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                  encoding="utf-8") # Run 60sec reporting per 5 sec
         while not self._stop:
             try:
                 line = self.p.stderr.readline()

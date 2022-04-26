@@ -31,9 +31,9 @@ class Dns(probe.Probe):
         self.protocol = protocol
         self._interval = interval
         self.tcp = protocol.lower() == "tcp"
-        self._name = 'DNS'
+        self._probe_name = 'DNS'
         super(Dns, self).__init__(target, name=name)
-        self.name = "%s-%s-%s-%s-%s" % (self._name.lower(), utils.sanitize(self.target),
+        self.name = "%s-%s-%s-%s-%s" % (self._probe_name.lower(), utils.sanitize(self.target),
                                         self.method.upper(),
                                         utils.sanitize(self.query), protocol.lower())
         self._count = 3
@@ -92,9 +92,9 @@ class Dns(probe.Probe):
         RRD.update(self.name, time=measurement_time, ping=float(rtime), miss=miss)
 
     def main(self):
-        logger.debug("Starting dns to %s %s IN %s @%s %s" % (self._name, self.query, self.method, self.target, self.protocol))
+        logger.debug("Starting dns to %s %s IN %s @%s %s" % (self._probe_name, self.query, self.method, self.target, self.protocol))
 
-        RRD.register(self.name, '%s %s IN %s @%s %s' % (self._name, self.query, self.method, self.target, self.protocol),
+        RRD.register(self.name, '%s %s IN %s @%s %s' % (self._probe_name, self.query, self.method, self.target, self.protocol),
                      step=self._interval*self._count, field_name="query time")
 
         while not self._stop:

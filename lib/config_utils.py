@@ -11,8 +11,6 @@ from lib import config as config_object
 from lib.exceptions import ConfigError
 import requests
 
-_reload = reload
-
 logger = logging.getLogger("config_utils")
 
 SETTINGS_FILE = "settings.yaml"
@@ -53,8 +51,8 @@ def load_config(reload=False):
     check_config_file()
     try:
         logger.info("Loading configuration")
-        stream = file(SETTINGS_PATH, 'r')
-        config = yaml.load(stream)
+        stream = open(SETTINGS_PATH, 'r')
+        config = yaml.load(stream, Loader=yaml.SafeLoader)
     except yaml.YAMLError as err:
         if hasattr(err, 'problem_mark'):
             mark = err.problem_mark

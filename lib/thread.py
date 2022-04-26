@@ -14,9 +14,9 @@ class Thread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
         self._stop = False
-        if '_name' not in vars(self):
-            self._name = self.__class__.__name__
-        self.name = self._name
+        if '_probe_name' not in vars(self):
+            self._probe_name = self.__class__.__name__
+        self.name = self._probe_name
         self._throttle_limit = 0.1
         self._throttle_time = 1
 
@@ -41,7 +41,7 @@ class Thread(threading.Thread):
         pass
 
     def run(self):
-        logger.info("Starting thread %s" % self._name)
+        logger.info("Starting thread %s" % self._probe_name)
         while not self._stop:
             start = time.time()
             try:

@@ -37,8 +37,7 @@ def create_probe(host, probe, options, start=False):
         name = host
     p = probe_cache[probe](host, name)
     if p.name not in probes_dict:
-        if reload:
-            logger.warn("Adding new probe %s" % p.name)
+        logger.warn("Adding new probe %s" % p.name)
         probes.append(p)
         probes_dict[p.name] = p
         if start:

@@ -19,7 +19,7 @@ class Hop(object):
         self.parent = parent
         self.address = address
         self.index = index
-        self.name = "%s-%s-%s-%s" % (self.parent._name, utils.sanitize(self.parent.target), index, utils.sanitize(self.address))
+        self.name = "%s-%s-%s-%s" % (self.parent._probe_name, utils.sanitize(self.parent.target), index, utils.sanitize(self.address))
         self.cache = []
         self._loss = 0
         self.latest = None
@@ -51,7 +51,7 @@ class MTR(probe.Probe):
     def __init__(self, target, protocol=4, interval=5, name=None):
         self.protocol = protocol
         self.interval = int(interval)
-        self._name = 'MTR%s' % self.protocol
+        self._probe_name = 'MTR%s' % self.protocol
         super(MTR, self).__init__(target, name=name)
         self.p = None
         self._count = 5
@@ -71,7 +71,7 @@ class MTR(probe.Probe):
         self.latest_index = 0
 
     def graphs(self):
-        return RRD.search('%s-%s' % (self._name, utils.sanitize(self.target)))
+        return RRD.search('%s-%s' % (self._probe_name, utils.sanitize(self.target)))
 
     def _kill(self):
         if self.p and self.p.returncode is not None:
@@ -106,7 +106,7 @@ class MTR(probe.Probe):
             logger.debug("New hop %s %s for target %s" % (index, address, self.target))
             if address not in self.hops:
                 self.hops[str(index)] = Hop(address, index, self)
-                RRD.register(self.hops[str(index)].name, '%s %s hop %s' % (self._name, self.target, address))
+                RRD.register(self.hops[str(index)].name, '%s %s hop %s' % (self._probe_name, self.target, address))
         elif line.startswith('p '):
             (crap, index, ping) = line.split()
             index = int(index)
@@ -123,7 +123,7 @@ class MTR(probe.Probe):
 
     def run_proc(self, opts, stderr=False):
         logger.debug("Starting %s to %s" % (opts[0], self.target))
-        self.p = subprocess.Popen(opts, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.p = subprocess.Popen(opts, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
         while not self._stop:
             try:
                 if stderr:
@@ -145,7 +145,7 @@ class MTR(probe.Probe):
             self.p.terminate()
         stderr = self.p.stderr.readlines()
         if self.p.returncode != 0:
-            logger.error("Got non zero return value from %s" % self._name)
+            logger.error("Got non zero return value from %s" % self._probe_name)
             logger.error("Suspending for 5 seconds")
             t = time.time()
             while not self._stop:
