@@ -24,7 +24,7 @@ logger = logging.getLogger("multiping")
 class MultiPing(multi_probe.MultiProbe):
     def __init__(self, protocol=4):
         self.protocol = protocol
-        self._name = 'Ping%s' % self.protocol
+        self._probe_name = 'Ping%s' % self.protocol
         super(MultiPing, self).__init__()
         self.p = None
         self._count = 5
@@ -62,12 +62,12 @@ class MultiPing(multi_probe.MultiProbe):
             logger.debug("Totals %s" % (out, ))
             return
         logger.debug(out)
-        target = "%s-%s" % (self._name.lower(), utils.sanitize(out['dest']))
+        target = "%s-%s" % (self._probe_name.lower(), utils.sanitize(out['dest']))
         RRD.update(target, time=out['timestamp'], ping=float(out['avg']),
                    miss=(int(out['xmt']) - int(out['rcv'])))
 
     def _add_host_local(self, target, name):
-        name = "%s-%s" % (self._name.lower(), utils.sanitize(target))
+        name = "%s-%s" % (self._probe_name.lower(), utils.sanitize(target))
         RRD.register(name, '%s %s' % (name, target))
 
     def main(self):
