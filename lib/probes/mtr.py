@@ -3,7 +3,7 @@
 
 from lib.rrd import RRD
 from lib import config, utils
-from lib.probe import register_probe
+from lib.probe import register_single_probe
 from lib.probes import probe
 
 import subprocess
@@ -157,4 +157,4 @@ class MTR(probe.Probe):
     def main(self):
         self.run_proc(self.opts, stderr=False)
 
-register_probe('mtr',MTR)
+register_single_probe('mtr', MTR)

@@ -11,11 +11,14 @@ logger.setLevel(logging.WARN)
 
 from lib import latenssi, config_utils
 
+
 def start_collector(args):
     latenssi.daemon()
 
+
 def start_web(args):
     latenssi.webdaemon()
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

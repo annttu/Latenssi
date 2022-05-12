@@ -10,7 +10,7 @@ import socket
 
 from lib.rrd import RRD
 from lib import config
-from lib.probe import register_probe
+from lib.probe import register_single_probe
 from lib.probes import probe
 from lib import utils
 
@@ -23,6 +23,7 @@ import dns.resolver
 import time
 
 logger = logging.getLogger("dns")
+
 
 class Dns(probe.Probe):
     def __init__(self, target, method="A", query="a.fi", protocol="udp", interval=5, name=None):
@@ -107,4 +108,4 @@ class Dns(probe.Probe):
             return
 
 
-register_probe('dns', Dns)
+register_single_probe('dns', Dns)

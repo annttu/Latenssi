@@ -287,6 +287,7 @@ class RRDManager(Thread):
             self.rrds[name] = RRDFile(name, *args, **kwargs)
 
     def update(self, name, ping, miss=0, time='N'):
+        name = utils.sanitize(name)
         self.register(name)
         self.rrds[name].update(ping=ping, miss=miss, time=time)
 

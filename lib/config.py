@@ -45,6 +45,7 @@ sync_interval = 59
 
 hosts = {}
 probes = {}
+multi_probes = {}
 remotes = {}
 
 api_keys = []

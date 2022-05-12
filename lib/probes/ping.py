@@ -3,7 +3,7 @@
 
 from lib.rrd import RRD
 from lib import config
-from lib.probe import register_probe
+from lib.probe import register_single_probe
 from lib.probes import probe
 
 import subprocess
@@ -100,4 +100,4 @@ class Ping(probe.Probe):
             return
 
 
-register_probe('ping',Ping)
+register_single_probe('ping', Ping)

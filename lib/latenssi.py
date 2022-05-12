@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 import sys
-from lib import rrd, config, config_utils, probe, web, probes, exceptions
+from lib import rrd, config, config_utils, probe, web, probes, multi_probes, exceptions
 from time import sleep
 import logging
 
@@ -55,6 +55,9 @@ def webdaemon(run=True):
 def daemon():
     childs = []
     for p in probe.probes:
+        childs.append(p)
+
+    for p in probe.multi_probes_dict.values():
         childs.append(p)
 
     childs.append(rrd.RRD)
