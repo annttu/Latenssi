@@ -40,9 +40,12 @@ class Dns(probe.Probe):
         self._count = 3
         self._timeout = 5
         self.resolver = dns.resolver.Resolver()
-        self.resolver.nameservers = [self.target]
-        self.resolver.timeout = 5 # Set 5 second timeout
-        self.resolver.lifetime = 5 # Set 5 second lifetime
+        try:
+            ip = socket.gethostbyname(self.target)
+            self.resolver.nameservers = [ip]
+        except socket.gaierror as e:
+            logger.error("Failed to resolve DNS target %s" % self.target)
+            raise ValueError(f"Invalid DNS target: %s" % self.target)
 
     def _kill(self):
         return None

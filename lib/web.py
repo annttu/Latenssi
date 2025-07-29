@@ -103,14 +103,22 @@ class ProbeWeb(WebPage):
         graphs = []
         for graph in self.get_graphs():
             if config.probe_addresses:
-                for probe_address in config.probe_addresses:
+                for probe_config in config.probe_addresses:
                     url_parts = []
-                    if "://" not in probe_address:
-                       url_parts.append("http:/")
-                    url_parts.append(probe_address)
+                    title = None
+                    if isinstance(probe_config, dict):
+                        probe_url = probe_config["url"]
+                        title = probe_config.get("title")
+                    else:
+                        probe_url = probe_config
+                    if not title:
+                        title = probe_config.split("://")[-1].split("/")[0]
+                    if "://" not in probe_url:
+                       url_parts.append("http://")
+                    url_parts.append(probe_url)
                     url_parts.append('graph/%s/?interval=%s&name=%s' % (graph, interval, self.name))
                     img = '/'.join(url_parts)
-                    graphs.append({'img': img, 'name': graph, 'title': probe_address.split("://")[-1].split("/")[0]})
+                    graphs.append({'img': img, 'name': graph, 'title': title})
             else:
                 img = os.path.join(config.relative_path, 'graph/%s/?interval=%s&name=%s' % (graph, interval, self.name))
                 graphs.append({'img': img, 'name': graph, 'title': self.probe.title})

@@ -42,6 +42,8 @@ hosts:
 
 # Probes
 probe_addresses:
-  - "localhost:8080/latenssi"  # address and path to this latenssi
-#  - "remote:8080/latenssi"  # Address to another latenssi instance
+  - url: "localhost:8080/latenssi"  # address and path to this latenssi
+    title: "localhost"
+#  - url: "remote:8080/latenssi"  # Address to another latenssi instance
+#    title: "remote"
 
